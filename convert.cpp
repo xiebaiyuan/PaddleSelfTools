@@ -11,19 +11,24 @@
 #include <vector>
 #include "framework.pb-c.h"
 #include "protobuf-c.h"
-
+#include <fstream>
+#include <iostream>
+#include "log.h"
 using std::string;
 
-static const std::string g_googlenet_combine = "../models/googlenet_combine";
-static const std::string g_googlenet = "../models/googlenet";
+static const std::string g_googlenet_combine = "/Users/xiebaiyuan/PaddleProject/quali/models/googlenet_combine";
+static const std::string g_googlenet = "/Users/xiebaiyuan/PaddleProject/quali/models/googlenet";
 
 char *Get_binary_data(const std::string &filename) {
+
     FILE *file = fopen(filename.c_str(), "rb");
-    std::cout << "file != nullptr," << "can't open file: " << filename.c_str() << std::endl;
+
     PADDLE_MOBILE_ENFORCE(file != nullptr, "can't open file: %s ",
                           filename.c_str());
     fseek(file, 0, SEEK_END);
     int64_t size = ftell(file);
+    DLOG<<"size of "<<filename.c_str()<<"  = "<<size;
+
     PADDLE_MOBILE_ENFORCE(size > 0, "size is too small");
     rewind(file);
     auto *data = new char[size];
@@ -39,14 +44,15 @@ const size_t SIZE_UINT_32 = sizeof(uint32_t);
 
 static size_t ReadBuffer(const char *file_name, uint8_t **out) {
     FILE *fp;
+    DLOG << "*file_name"<< (*file_name);
+
     fp = fopen(file_name, "rb");
     PADDLE_MOBILE_ENFORCE(fp != nullptr, " %s open failed !", file_name);
-
     fseek(fp, 0, SEEK_END);
-    auto size = static_cast<size_t>(ftell(fp));
-    rewind(fp);
+    size_t size = static_cast<size_t>(ftell(fp));
 
-//  DLOG << "model size: " << size;
+    rewind(fp);
+    DLOG << "model size: " << size;
 
     *out = reinterpret_cast<uint8_t *>(malloc(size));
 
@@ -59,11 +65,14 @@ static size_t ReadBuffer(const char *file_name, uint8_t **out) {
     return cur_len;
 }
 
-std::shared_ptr<ProgramDesc> loadParams(const std::string &model_path) {
-    const std::string &model_filename = model_path;
+std::shared_ptr<ProgramDesc> loadParams(const std::string model_path) {
     PaddleMobile__Framework__Proto__ProgramDesc *c_program;
     uint8_t *buf = nullptr;
-    size_t read_size = ReadBuffer(model_filename.c_str(), &buf);
+    DLOG << "model_filename.c_str()"<< model_path.c_str();
+
+    size_t read_size = ReadBuffer(model_path.c_str(), &buf);
+
+    DLOG << "read_size :"<< read_size;
 
     PADDLE_MOBILE_ENFORCE(buf != nullptr, "read from __model__ is null");
 
@@ -72,9 +81,16 @@ std::shared_ptr<ProgramDesc> loadParams(const std::string &model_path) {
     //
     PADDLE_MOBILE_ENFORCE(c_program != nullptr, "program is null");
     //
-//  DLOG << "n_ops: " << (*c_program->blocks)->n_ops;
+
+    //std::cout<<"n_ops:  = "<<(*c_program->blocks)->n_ops<<std::endl;
+
+  //  DLOG << "n_ops: " << (*c_program->blocks)->n_ops;
     //
     auto originProgramDesc = std::make_shared<ProgramDesc>(c_program);
+    DLOG << "originProgramDesc.get()->Blocks().size() "<< originProgramDesc.get()->Blocks().size();
+
+   // std::cout<<"originProgramDesc = "<<originProgramDesc.get()->Blocks().size()<<std::endl;
+
     return originProgramDesc;
 
 }
@@ -209,7 +225,7 @@ void quantificate_combined(const std::string &model_path, const std::string &par
 //    paddle_mobile::Loader<paddle_mobile::CPU,paddle_mobile::Precision::FP32 > loader;
     //auto program = loader.Load(model_path, param_path, optimize);
 
-    auto program = loadParams(model_path + "/__model__");
+    auto program = loadParams(model_path);
 
     char *origin_data = Get_binary_data(param_path);
     char *data = origin_data;
@@ -232,20 +248,22 @@ void quantificate_combined(const std::string &model_path, const std::string &par
 
 }
 
-void quantificate_seperated(const std::string &model_dir, const std::string &param_min_path) {
+void quantificate_seperated(const std::string model_dir, const std::string param_min_path) {
     //  paddle_mobile::Loader<paddle_mobile::CPU,paddle_mobile::Precision::FP32 > loader;
     // auto program = loader.Load(model_dir, optimize);
 
-    auto program = loadParams(model_dir);
+    auto program = loadParams(model_dir + "/__model__");
 
     std::string shell_command = "mkdir " + param_min_path;
     system(shell_command.c_str());
 
     for (const auto &block : program->Blocks()) {
+        DLOG<<"block->Vars().size(): "<<block->Vars().size();
         for (const auto &var_desc : block->Vars()) {
 //                auto var = program.scope->Var(var_desc->Name());
             if (var_desc->Persistable()) {
 //                    auto tensor = var->template GetMutable<paddle_mobile::framework::LoDTensor>();
+                DLOG<<"var_desc->Name(): "<<var_desc->Name();
 
                 if (var_desc->Name() == "feed" || var_desc->Name() == "fetch") {
                     continue;
@@ -265,14 +283,13 @@ void quantificate_seperated(const std::string &model_dir, const std::string &par
 
 }
 
-
 int main() {
     std::string filename = "params_min";
     std::string model_path = g_googlenet_combine + "/model";
     std::string param_path = g_googlenet_combine + "/params";
     std::string dirname = "param_min_dir";
     std::string model_dir = g_googlenet;
-//        quantificate_combined(model_path, param_path,filename);
+    //quantificate_combined(model_path, param_path,filename);
     quantificate_seperated(model_dir, dirname);
 
     return 0;
