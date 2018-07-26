@@ -14,10 +14,10 @@
 #include <fstream>
 #include <iostream>
 #include "log.h"
-using std::string;
 
-static const std::string g_googlenet_combine = "/Users/xiebaiyuan/PaddleProject/quali/models/googlenet_combine";
-static const std::string g_googlenet = "/Users/xiebaiyuan/PaddleProject/quali/models/googlenet";
+
+const size_t kSize64 = sizeof(uint64_t);
+const size_t kSize32 = sizeof(uint32_t);
 
 char *Get_binary_data(const std::string &filename) {
 
@@ -27,7 +27,7 @@ char *Get_binary_data(const std::string &filename) {
                           filename.c_str());
     fseek(file, 0, SEEK_END);
     int64_t size = ftell(file);
-    DLOG<<"size of "<<filename.c_str()<<"  = "<<size;
+    DLOG << "size of " << filename.c_str() << "  = " << size;
 
     PADDLE_MOBILE_ENFORCE(size > 0, "size is too small");
     rewind(file);
@@ -39,23 +39,17 @@ char *Get_binary_data(const std::string &filename) {
     return data;
 }
 
-const size_t SIZE_UINT_64 = sizeof(uint64_t);
-const size_t SIZE_UINT_32 = sizeof(uint32_t);
 
 static size_t ReadBuffer(const char *file_name, uint8_t **out) {
     FILE *fp;
-    DLOG << "*file_name"<< (*file_name);
-
+    DLOG << "*file_name" << (*file_name);
     fp = fopen(file_name, "rb");
     PADDLE_MOBILE_ENFORCE(fp != nullptr, " %s open failed !", file_name);
     fseek(fp, 0, SEEK_END);
-    size_t size = static_cast<size_t>(ftell(fp));
-
+    auto size = static_cast<size_t>(ftell(fp));
     rewind(fp);
     DLOG << "model size: " << size;
-
     *out = reinterpret_cast<uint8_t *>(malloc(size));
-
     size_t cur_len = 0;
     size_t nread;
     while ((nread = fread(*out + cur_len, 1, size - cur_len, fp)) != 0) {
@@ -65,32 +59,18 @@ static size_t ReadBuffer(const char *file_name, uint8_t **out) {
     return cur_len;
 }
 
-std::shared_ptr<ProgramDesc> loadParams(const std::string model_path) {
+std::shared_ptr<ProgramDesc> loadParams(const std::string &model_path) {
     PaddleMobile__Framework__Proto__ProgramDesc *c_program;
     uint8_t *buf = nullptr;
-    DLOG << "model_filename.c_str()"<< model_path.c_str();
-
+    DLOG << "model_filename.c_str()" << model_path.c_str();
     size_t read_size = ReadBuffer(model_path.c_str(), &buf);
-
-    DLOG << "read_size :"<< read_size;
-
+    DLOG << "read_size :" << read_size;
     PADDLE_MOBILE_ENFORCE(buf != nullptr, "read from __model__ is null");
-
     c_program = paddle_mobile__framework__proto__program_desc__unpack(
             nullptr, read_size, buf);
-    //
     PADDLE_MOBILE_ENFORCE(c_program != nullptr, "program is null");
-    //
-
-    //std::cout<<"n_ops:  = "<<(*c_program->blocks)->n_ops<<std::endl;
-
-  //  DLOG << "n_ops: " << (*c_program->blocks)->n_ops;
-    //
     auto originProgramDesc = std::make_shared<ProgramDesc>(c_program);
-    DLOG << "originProgramDesc.get()->Blocks().size() "<< originProgramDesc.get()->Blocks().size();
-
-   // std::cout<<"originProgramDesc = "<<originProgramDesc.get()->Blocks().size()<<std::endl;
-
+    DLOG << "originProgramDesc.get()->Blocks().size() " << originProgramDesc->Blocks().size();
     return originProgramDesc;
 
 }
@@ -100,32 +80,26 @@ void LoadWithDump(const paddle_mobile::framework::VarDesc &var_desc, char *dataP
     uint32_t version = *reinterpret_cast<uint32_t *>(dataP);
 
     // write version
-    fwrite(&version, SIZE_UINT_32, 1, out_file);
+    fwrite(&version, kSize32, 1, out_file);
 
-    dataP += SIZE_UINT_32;
+    dataP += kSize32;
 
     // 2 Lod information
     auto *lod_level_ptr = new uint64_t();
-    memcpy(lod_level_ptr, dataP, SIZE_UINT_64);
+    memcpy(lod_level_ptr, dataP, kSize64);
 
     uint64_t lod_level = 0;
     // write lod Information
-    fwrite(&lod_level, SIZE_UINT_64, 1, out_file);
+    fwrite(&lod_level, kSize64, 1, out_file);
     delete lod_level_ptr;
 
-
-    dataP += SIZE_UINT_64;
-
-
-//    auto &lod = *tensor->mutable_lod();
-//    lod.resize(lod_level);
-
+    dataP += kSize64;
 
     for (uint64_t i = 0; i < lod_level; ++i) {
         uint64_t size = *reinterpret_cast<uint64_t *>(dataP);
         // write lod size
-        fwrite(&size, SIZE_UINT_64, 1, out_file);
-        (dataP) += SIZE_UINT_64;
+        fwrite(&size, kSize64, 1, out_file);
+        (dataP) += kSize64;
 
         std::vector<size_t> tmp(size / sizeof(size_t));
         for (unsigned long &k : tmp) {
@@ -134,15 +108,13 @@ void LoadWithDump(const paddle_mobile::framework::VarDesc &var_desc, char *dataP
         }
         // write lod size vector
         fwrite(&tmp, sizeof(size_t), tmp.size(), out_file);
-
-        //   lod[i] = tmp;
     }
 
     // 3. tensor version
     uint32_t tensor_version = *reinterpret_cast<uint32_t *>(dataP);
     // write tensor version
-    fwrite(&tensor_version, SIZE_UINT_32, 1, out_file);
-    (dataP) += SIZE_UINT_32;
+    fwrite(&tensor_version, kSize32, 1, out_file);
+    (dataP) += kSize32;
 
     // 4. tensor desc
     int32_t size = *reinterpret_cast<int32_t *>(dataP);
@@ -164,9 +136,6 @@ void LoadWithDump(const paddle_mobile::framework::VarDesc &var_desc, char *dataP
         memory_size *= l;
     }
 
-
-    //tensor->Resize(paddle_mobile::framework::make_ddim(desc.Dims()));
-
     void *memory = nullptr;
     int type_size = 0;
     switch (desc.DataType()) {
@@ -175,7 +144,6 @@ void LoadWithDump(const paddle_mobile::framework::VarDesc &var_desc, char *dataP
             break;
         case paddle_mobile::framework::VARTYPE_TYPE_FP32:
             type_size = 4;
-            // memory = tensor->mutable_data<float>();
             break;
         case paddle_mobile::framework::VARTYPE_TYPE_FP64:
             type_size = 8;
@@ -218,24 +186,18 @@ void LoadWithDump(const paddle_mobile::framework::VarDesc &var_desc, char *dataP
         auto factor = (uint8_t) round((value - min_value) / (max_value - min_value) * 255);
         fwrite(&factor, sizeof(uint8_t), 1, out_file);
     }
-
 }
 
-void quantificate_combined(const std::string &model_path, const std::string &param_path, const std::string &param_min_path) {
-//    paddle_mobile::Loader<paddle_mobile::CPU,paddle_mobile::Precision::FP32 > loader;
-    //auto program = loader.Load(model_path, param_path, optimize);
+void
+quantificate_combined(const std::string &model_path, const std::string &param_path, const std::string &param_min_path) {
 
     auto program = loadParams(model_path);
-
     char *origin_data = Get_binary_data(param_path);
     char *data = origin_data;
     FILE *out_file = fopen(param_min_path.c_str(), "wb");
-
     for (const auto &block : program->Blocks()) {
         for (const auto &var_desc : block->Vars()) {
-            //   auto var = program.scope->Var(var_desc->Name());
             if (var_desc->Persistable()) {
-                //     auto tensor = var->template GetMutable<paddle_mobile::framework::LoDTensor>();
                 if (var_desc->Name() == "feed" || var_desc->Name() == "fetch") {
                     continue;
                 }
@@ -249,8 +211,6 @@ void quantificate_combined(const std::string &model_path, const std::string &par
 }
 
 void quantificate_seperated(const std::string model_dir, const std::string param_min_path) {
-    //  paddle_mobile::Loader<paddle_mobile::CPU,paddle_mobile::Precision::FP32 > loader;
-    // auto program = loader.Load(model_dir, optimize);
 
     auto program = loadParams(model_dir + "/__model__");
 
@@ -258,21 +218,14 @@ void quantificate_seperated(const std::string model_dir, const std::string param
     system(shell_command.c_str());
 
     for (const auto &block : program->Blocks()) {
-        DLOG<<"block->Vars().size(): "<<block->Vars().size();
         for (const auto &var_desc : block->Vars()) {
-//                auto var = program.scope->Var(var_desc->Name());
             if (var_desc->Persistable()) {
-//                    auto tensor = var->template GetMutable<paddle_mobile::framework::LoDTensor>();
-                DLOG<<"var_desc->Name(): "<<var_desc->Name();
-
                 if (var_desc->Name() == "feed" || var_desc->Name() == "fetch") {
                     continue;
                 }
                 std::string file_name = param_min_path + "/" + var_desc->Name();
-
                 FILE *out_file = fopen(file_name.c_str(), "wb");
-                char *origin_data =
-                        Get_binary_data(model_dir + "/" + var_desc->Name());
+                char *origin_data = Get_binary_data(model_dir + "/" + var_desc->Name());
                 char *data = origin_data;
                 LoadWithDump(*var_desc, data, out_file);
                 delete origin_data;
@@ -283,16 +236,49 @@ void quantificate_seperated(const std::string model_dir, const std::string param
 
 }
 
-int main() {
-    std::string combined_min_dir = "params_min";
-    std::string model_path = g_googlenet_combine + "/model";
-    std::string param_path = g_googlenet_combine + "/params";
-    std::string dirname = "param_min_dir";
-    std::string model_dir = g_googlenet;
-    quantificate_combined(model_path, param_path,combined_min_dir);
-   // quantificate_seperated(model_dir, dirname);
 
-    return 0;
+int main(int argc, char **argv) {
+
+    const std::string kNoteEg = "( eg:  ./quali 1 your_combined_model_path output_path  or  ./quali 0 your_seperated_model_path output_path)";
+
+    for (int i = 0; i < argc; ++i) {
+        DLOG << "argv[" << i << "]" << argv[i];
+    }
+
+    PADDLE_MOBILE_ENFORCE(argc > 1, "wee need params.%s ", kNoteEg.c_str())
+
+    std::string action_type = argv[1];
+    PADDLE_MOBILE_ENFORCE(argc > 1 && (action_type) == "1" || action_type == "0",
+                          "only 1 or 2 supported, current is %s %s ",
+                          action_type.c_str(),
+                          kNoteEg.c_str())
+
+    PADDLE_MOBILE_ENFORCE(argc > 2, "we need your model path. %s ", kNoteEg.c_str())
+    std::string base_path = argv[2];
+
+    PADDLE_MOBILE_ENFORCE(argc > 3, "we need your output path. %s ", kNoteEg.c_str())
+    std::string output_path = argv[3];
+
+    if (action_type == "0") {
+        // for seperated
+        const std::string &seperated_min_dir = output_path;
+        quantificate_seperated(base_path, seperated_min_dir);
+        return 0;
+    }
+
+    if (action_type == "1") {
+        // for combined
+        const std::string &combined_min_dir = output_path;
+        std::string model_path = base_path + "/model";
+        std::string param_path = base_path + "/params";
+        quantificate_combined(model_path, param_path, combined_min_dir);
+
+        return 0;
+    }
+
+    DLOG << "bad action type note";
+
+    return -1;
 }
 
 
