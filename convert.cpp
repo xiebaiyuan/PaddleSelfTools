@@ -284,13 +284,13 @@ void quantificate_seperated(const std::string model_dir, const std::string param
 }
 
 int main() {
-    std::string filename = "params_min";
+    std::string combined_min_dir = "params_min";
     std::string model_path = g_googlenet_combine + "/model";
     std::string param_path = g_googlenet_combine + "/params";
     std::string dirname = "param_min_dir";
     std::string model_dir = g_googlenet;
-    //quantificate_combined(model_path, param_path,filename);
-    quantificate_seperated(model_dir, dirname);
+    quantificate_combined(model_path, param_path,combined_min_dir);
+   // quantificate_seperated(model_dir, dirname);
 
     return 0;
 }
