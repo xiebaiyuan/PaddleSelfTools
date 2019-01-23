@@ -7,12 +7,14 @@ layer_mdl_relu = 'ReluLayer'
 layer_mdl_pointwise_add = 'PointwiseConvolutionLayer'
 layer_mdl_pooling = 'PoolingLayer'
 layer_mdl_softmax = 'SoftmaxLayer'
+layer_mdl_sigmoid = 'SigmoidLayer'
 
 # fluid ops
 op_fluid_fusion_conv_add = 'fusion_conv_add'
 op_fluid_relu = 'relu'
 op_fluid_pooling = 'pool2d'
 op_fluid_softmax = 'softmax'
+op_fluid_sigmoid = 'sigmoid'
 
 # dict mdk layer ---  fluid op
 mdl2fluid_op_layer_dict = {
@@ -21,7 +23,8 @@ mdl2fluid_op_layer_dict = {
     layer_mdl_relu: op_fluid_relu,
     layer_mdl_pointwise_add: op_fluid_fusion_conv_add,
     layer_mdl_pooling: op_fluid_pooling,
-    layer_mdl_softmax: op_fluid_softmax
+    layer_mdl_softmax: op_fluid_softmax,
+    layer_mdl_sigmoid: op_fluid_sigmoid
 }
 
 mdl_outputs_key = "outputs"
@@ -49,6 +52,11 @@ relu_dict = {
 
 }
 
+sigmoid_dict = {
+    mdl_inputs_key: 'X',
+    mdl_outputs_key: 'Out',
+}
+
 pool2d_dict = {
     mdl_inputs_key: 'X',
     mdl_outputs_key: 'Out',
@@ -68,7 +76,8 @@ op_io_dict = {
     'fusion_conv_add': fusion_conv_add_dict,
     'relu': relu_dict,
     'pool2d': pool2d_dict,
-    'softmax': softmax_dict
+    'softmax': softmax_dict,
+    'sigmoid': sigmoid_dict
 }
 
 # fluid attr key  ---  mdl params key

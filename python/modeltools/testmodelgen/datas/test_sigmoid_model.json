@@ -1,0 +1,31 @@
+{
+  "layer": [
+    {
+      "name": "SigmoidLayer",
+      "input": [
+        "data1"
+      ],
+      "output": [
+        "data2"
+      ],
+      "type": "SigmoidLayer"
+    }
+  ],
+  "matrix": {
+    "data1": [
+      1,
+      10,
+      1000,
+      1000
+    ],
+    "data2": [
+      1,
+      10,
+      1000,
+      1000
+    ]
+  },
+  "meta": {
+    "model_version": 1
+  }
+}

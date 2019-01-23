@@ -26,5 +26,5 @@ def get_file_size(file_path):
     return round(fsize, 2)
 
 
-path = '/Users/xiebaiyuan/PaddleProject/paddle-mobile/tools/python/modeltools/mobilenet/datas/sourcemodels/mobilenet_example/mobilenet/__model__'
+path = '/Users/xiebaiyuan/PaddleProject/GITHUB/PaddleMobileModelTools/python/modeltools/testmodelgen/datas/target/testmodel/__model__'
 read_model(path)
