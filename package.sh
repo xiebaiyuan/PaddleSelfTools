@@ -32,9 +32,9 @@ function init() {
   BOLD='\033[1m'
   NONE='\033[0m'
 
-  PADDLE_MOBILE_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}")/../" && pwd )"
+  PADDLE_MOBILE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../" && pwd)"
   if [ -z "${SCRIPT_NAME}" ]; then
-      SCRIPT_NAME=$0
+    SCRIPT_NAME=$0
   fi
 
   rm -rf ../build/package_old
@@ -43,37 +43,37 @@ function init() {
   mkdir ../build/package
   cd ../build/package/
   rm -rf gitinfo.txt
-  date +%Y-%m-%d-%H:%M:%S >> gitinfo.txt
-  echo "current commit id: " >> gitinfo.txt
-  git rev-parse HEAD >> gitinfo.txt
+  date +%Y-%m-%d-%H:%M:%S >>gitinfo.txt
+  echo "current commit id: " >>gitinfo.txt
+  git rev-parse HEAD >>gitinfo.txt
   cd -
 
-# merge cl to so
-merge_cl_to_so=1
-opencl_kernels="opencl_kernels.cpp"
-cd ../src/operators/kernel/cl
-if [[ -f "${opencl_kernels}" ]]; then
+  # merge cl to so
+  merge_cl_to_so=1
+  opencl_kernels="opencl_kernels.cpp"
+  cd ../src/operators/kernel/cl
+  if [[ -f "${opencl_kernels}" ]]; then
     rm "${opencl_kernels}"
-fi
-python gen_code.py "${merge_cl_to_so}" > "${opencl_kernels}"
-cd -
+  fi
+  python gen_code.py "${merge_cl_to_so}" >"${opencl_kernels}"
+  cd -
 
-# get cl headers
-# opencl_header_dir="../third_party/opencl/OpenCL-Headers"
-# commit_id="320d7189b3e0e7b6a8fc5c10334c79ef364b5ef6"
-# if [[ -d "$opencl_header_dir" && -d "$opencl_header_dir/.git" ]]; then
-#     echo "pulling opencl headers"
-#     cd $opencl_header_dir
-#     git stash
-#     git pull
-#     git checkout $commit_id
-#     cd -
-# else
-#     echo "cloning opencl headers"
-#     rm -rf $opencl_header_dir
-#     git clone https://github.com/KhronosGroup/OpenCL-Headers $opencl_header_dir
-#     git checkout $commit_id
-# fi
+  # get cl headers
+  # opencl_header_dir="../third_party/opencl/OpenCL-Headers"
+  # commit_id="320d7189b3e0e7b6a8fc5c10334c79ef364b5ef6"
+  # if [[ -d "$opencl_header_dir" && -d "$opencl_header_dir/.git" ]]; then
+  #     echo "pulling opencl headers"
+  #     cd $opencl_header_dir
+  #     git stash
+  #     git pull
+  #     git checkout $commit_id
+  #     cd -
+  # else
+  #     echo "cloning opencl headers"
+  #     rm -rf $opencl_header_dir
+  #     git clone https://github.com/KhronosGroup/OpenCL-Headers $opencl_header_dir
+  #     git checkout $commit_id
+  # fi
 }
 
 function check_ndk() {
@@ -99,9 +99,9 @@ function build_android_armv7_cpu_only() {
     -DGPU_CL=OFF \
     -DFPGA=OFF
 
-    cd ../build/armeabi-v7a-cpu && make -j 8
-    cd -
-  
+  cd ../build/armeabi-v7a-cpu && make -j 8
+  cd -
+
 }
 
 function build_android_armv7_gpu() {
@@ -137,8 +137,8 @@ function build_android_armv8_cpu_only() {
     -DCPU=ON \
     -DGPU_CL=OFF \
     -DFPGA=OFF
- cd ../build/arm64-v8a-cpu && make -j 1
- cd -
+  cd ../build/arm64-v8a-cpu && make -j 1
+  cd -
 }
 
 function build_android_armv8_gpu() {
@@ -156,8 +156,8 @@ function build_android_armv8_gpu() {
     -DGPU_CL=ON \
     -DFPGA=OFF
 
- cd ../build/arm64-v8a-gpu && make -j 8
- cd -
+  cd ../build/arm64-v8a-gpu && make -j 8
+  cd -
 }
 
 function build_ios_armv8_cpu_only() {
@@ -248,11 +248,11 @@ function build_linux_armv7() {
 
 function build_linux_fpga() {
   cd ..
-  image=`docker images paddle-mobile:dev | grep 'paddle-mobile'`
+  image=$(docker images paddle-mobile:dev | grep 'paddle-mobile')
   if [[ "x"$image == "x" ]]; then
-    docker build -t paddle-mobile:dev - < Dockerfile
+    docker build -t paddle-mobile:dev - <Dockerfile
   fi
-  docker run --rm -v `pwd`:/workspace paddle-mobile:dev bash /workspace/tools/docker_build_fpga.sh
+  docker run --rm -v $(pwd):/workspace paddle-mobile:dev bash /workspace/tools/docker_build_fpga.sh
   cd -
 }
 
@@ -266,36 +266,42 @@ function cp_asserts() {
   cp ../build/armeabi-v7a-cpu/build/libpaddle-mobile.so ../build/package/libpaddle-mobile-v7a-cpu.so
   cp ../build/armeabi-v7a-gpu/build/libpaddle-mobile.so ../build/package/libpaddle-mobile-v7a-gpu.so
 
-
   cp ../src/io/paddle_inference_api.h ../build/package/paddle_inference_api.h
+
+  cd "../build/"
+  now=$(date +%Y-%m-%d-%H:%M:%S)
+  echo $now
+  zip -r paddlemobile_$now ./package/
+  cd -
+
 }
 
 function main() {
   local CMD=$1
   init
   case $CMD in
-    android_armv7)
-      build_android_armv7
-      # run_android_test armeabi-v7a 
-      ;;
-    android_armv8)
-      build_android_armv8
-      # run_android_test arm64-v8a
-      ;;
-    ios)
-      build_ios
-      ;;
-    linux_armv7)
-      build_linux_armv7
-      ;;
-    fpga)
-      build_linux_fpga
-      ;;
-    *)
-      print_usage
-      exit 0
-      ;;
-    esac
+  android_armv7)
+    build_android_armv7
+    # run_android_test armeabi-v7a
+    ;;
+  android_armv8)
+    build_android_armv8
+    # run_android_test arm64-v8a
+    ;;
+  ios)
+    build_ios
+    ;;
+  linux_armv7)
+    build_linux_armv7
+    ;;
+  fpga)
+    build_linux_fpga
+    ;;
+  *)
+    print_usage
+    exit 0
+    ;;
+  esac
 }
 # main $@
 # main android_armv7
