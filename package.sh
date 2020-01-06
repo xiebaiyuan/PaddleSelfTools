@@ -41,11 +41,12 @@ function init() {
   mv ../build/package ../build/package_old
   # rm -rf ../build/package
   mkdir ../build/package
-  rm -rf ../build/package/gitinfo.txt
-  date +%Y-%m-%d >> ../build/package/gitinfo.txt
-  echo "current commit id: " >> ../build/package/gitinfo.txt
-  git rev-parse HEAD >> ../build/package/gitinfo.txt
-
+  cd ../build/package/
+  rm -rf gitinfo.txt
+  date +%Y-%m-%d-%H:%M:%S >> gitinfo.txt
+  echo "current commit id: " >> gitinfo.txt
+  git rev-parse HEAD >> gitinfo.txt
+  cd -
 
 # merge cl to so
 merge_cl_to_so=1
@@ -301,7 +302,7 @@ function main() {
 # main android_armv8
 #  export NDK_ROOT=/opt/android-ndk-r17c
 
-# init
-main android_armv7
-main android_armv8
-cp_asserts
+init
+# main android_armv7
+# main android_armv8
+# cp_asserts
