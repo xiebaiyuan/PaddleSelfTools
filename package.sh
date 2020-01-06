@@ -302,7 +302,7 @@ function main() {
 # main android_armv8
 #  export NDK_ROOT=/opt/android-ndk-r17c
 
-init
-# main android_armv7
-# main android_armv8
-# cp_asserts
+# init
+main android_armv7
+main android_armv8
+cp_asserts
