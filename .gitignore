@@ -45,4 +45,5 @@ Makefile
 cmake-build-debug/
 cmake_install.cmake
 models/
+build/
 quali
