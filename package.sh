@@ -1,22 +1,5 @@
 #!/usr/bin/env bash
-
-# Copyright (c) 2018 PaddlePaddle Authors. All Rights Reserved.
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-# 
-#     http://www.apache.org/licenses/LICENSE-2.0
-# 
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 set -e
-# source ./ci_run_test.sh
-
 function print_usage() {
   echo "\n${RED}Usage${NONE}:
   ${BOLD}${SCRIPT_NAME}${NONE} [Option] [Network]"
@@ -101,7 +84,7 @@ function check_ndk() {
 }
 
 function build_android_armv7_cpu_only() {
-  rm -rf ../build/armeabi-v7a-cpu
+  # rm -rf ../build/armeabi-v7a-cpu
   cmake .. \
     -B"../build/armeabi-v7a-cpu" \
     -DANDROID_ABI="armeabi-v7a with NEON" \
@@ -121,7 +104,7 @@ function build_android_armv7_cpu_only() {
 }
 
 function build_android_armv7_gpu() {
-  rm -rf ../build/armeabi-v7a-gpu
+  # rm -rf ../build/armeabi-v7a-gpu
   cmake .. \
     -B"../build/armeabi-v7a-gpu" \
     -DANDROID_ABI="armeabi-v7a with NEON" \
@@ -140,7 +123,7 @@ function build_android_armv7_gpu() {
 }
 
 function build_android_armv8_cpu_only() {
-  rm -rf ../build/arm64-v8a-cpu
+  # rm -rf ../build/arm64-v8a-cpu
   cmake .. \
     -B"../build/arm64-v8a-cpu" \
     -DANDROID_ABI="arm64-v8a" \
@@ -158,7 +141,7 @@ function build_android_armv8_cpu_only() {
 }
 
 function build_android_armv8_gpu() {
-  rm -rf ../build/arm64-v8a-gpu
+  # rm -rf ../build/arm64-v8a-gpu
   cmake .. \
     -B"../build/arm64-v8a-gpu" \
     -DANDROID_ABI="arm64-v8a" \
@@ -177,7 +160,7 @@ function build_android_armv8_gpu() {
 }
 
 function build_ios_armv8_cpu_only() {
-  rm -rf ../build/ios
+  # rm -rf ../build/ios
   cmake .. \
     -B"../build/ios" \
     -DCMAKE_BUILD_TYPE="MinSizeRel" \
@@ -195,7 +178,7 @@ function build_ios_armv8_cpu_only() {
 }
 
 function build_ios_armv8_gpu() {
-  rm -rf ../build/ios
+  # rm -rf ../build/ios
   cmake .. \
     -B"../build/ios" \
     -DCMAKE_BUILD_TYPE="MinSizeRel" \
@@ -277,10 +260,10 @@ function run_android_test() {
 }
 
 function cp_asserts() {
-  cp ../build/arm64-v8a-cpu/libpaddle-mobile.so ../build/package/libpaddle-mobile-v8a-cpu.so
-  cp ../build/arm64-v8a-gpu/libpaddle-mobile.so ../build/package/libpaddle-mobile-v8a-gpu.so
-  cp ../build/arm64-v7a-cpu/libpaddle-mobile.so ../build/package/libpaddle-mobile-v7a-cpu.so
-  cp ../build/arm64-v7a-gpu/libpaddle-mobile.so ../build/package/libpaddle-mobile-v7a-gpu.so
+  cp ../build/arm64-v8a-cpu/build/libpaddle-mobile.so ../build/package/libpaddle-mobile-v8a-cpu.so
+  cp ../build/arm64-v8a-gpu/build/libpaddle-mobile.so ../build/package/libpaddle-mobile-v8a-gpu.so
+  cp ../build/armeabi-v7a-cpu/build/libpaddle-mobile.so ../build/package/libpaddle-mobile-v7a-cpu.so
+  cp ../build/armeabi-v7a-gpu/build/libpaddle-mobile.so ../build/package/libpaddle-mobile-v7a-gpu.so
 
 
   cp ../src/io/paddle_inference_api.h ../build/package/paddle_inference_api.h
@@ -316,6 +299,7 @@ function main() {
 # main $@
 # main android_armv7
 # main android_armv8
+#  export NDK_ROOT=/opt/android-ndk-r17c
 
 # init
 main android_armv7
