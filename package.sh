@@ -89,12 +89,14 @@ function build_android_armv7_cpu_only() {
   cmake .. \
     -B"../build/armeabi-v7a-cpu" \
     -DANDROID_ABI="armeabi-v7a with NEON" \
-    -DCMAKE_BUILD_TYPE="MinSizeRel" \
+    -DCMAKE_BUILD_TYPE="Release" \
     -DCMAKE_TOOLCHAIN_FILE="./tools/android-cmake/android.toolchain.cmake" \
-    -DANDROID_PLATFORM="android-22" \
+    -DANDROID_PLATFORM="android-19" \
     -DANDROID_STL=c++_static \
     -DANDROID=true \
     -DWITH_LOGGING=OFF \
+    -DWITH_PROFILE=OFF \
+    -DUSE_EXCEPTION=ON \
     -DCPU=ON \
     -DGPU_CL=OFF \
     -DFPGA=OFF
@@ -109,12 +111,14 @@ function build_android_armv7_gpu() {
   cmake .. \
     -B"../build/armeabi-v7a-gpu" \
     -DANDROID_ABI="armeabi-v7a with NEON" \
-    -DCMAKE_BUILD_TYPE="MinSizeRel" \
+    -DCMAKE_BUILD_TYPE="Release" \
     -DCMAKE_TOOLCHAIN_FILE="./tools/android-cmake/android.toolchain.cmake" \
-    -DANDROID_PLATFORM="android-22" \
+    -DANDROID_PLATFORM="android-19" \
     -DANDROID_STL=c++_static \
     -DANDROID=true \
     -DWITH_LOGGING=OFF \
+    -DWITH_PROFILE=OFF \
+    -DUSE_EXCEPTION=ON \
     -DCPU=ON \
     -DGPU_CL=ON \
     -DFPGA=OFF
@@ -128,30 +132,34 @@ function build_android_armv8_cpu_only() {
   cmake .. \
     -B"../build/arm64-v8a-cpu" \
     -DANDROID_ABI="arm64-v8a" \
-    -DCMAKE_BUILD_TYPE="MinSizeRel" \
+    -DCMAKE_BUILD_TYPE="Release" \
     -DCMAKE_TOOLCHAIN_FILE="./tools/android-cmake/android.toolchain.cmake" \
-    -DANDROID_PLATFORM="android-22" \
+    -DANDROID_PLATFORM="android-19" \
     -DANDROID_STL=c++_static \
     -DANDROID=true \
     -DWITH_LOGGING=OFF \
+    -DWITH_PROFILE=OFF \
+    -DUSE_EXCEPTION=ON \
     -DCPU=ON \
     -DGPU_CL=OFF \
     -DFPGA=OFF
   cd ../build/arm64-v8a-cpu && make -j 1
   cd -
 }
-
+# MinSizeRel
 function build_android_armv8_gpu() {
   # rm -rf ../build/arm64-v8a-gpu
   cmake .. \
     -B"../build/arm64-v8a-gpu" \
     -DANDROID_ABI="arm64-v8a" \
-    -DCMAKE_BUILD_TYPE="MinSizeRel" \
+    -DCMAKE_BUILD_TYPE="Release" \
     -DCMAKE_TOOLCHAIN_FILE="./tools/android-cmake/android.toolchain.cmake" \
-    -DANDROID_PLATFORM="android-22" \
+    -DANDROID_PLATFORM="android-19" \
     -DANDROID_STL=c++_static \
     -DANDROID=true \
     -DWITH_LOGGING=OFF \
+    -DWITH_PROFILE=OFF \
+    -DUSE_EXCEPTION=ON \
     -DCPU=ON \
     -DGPU_CL=ON \
     -DFPGA=OFF
@@ -164,7 +172,7 @@ function build_ios_armv8_cpu_only() {
   # rm -rf ../build/ios
   cmake .. \
     -B"../build/ios" \
-    -DCMAKE_BUILD_TYPE="MinSizeRel" \
+    -DCMAKE_BUILD_TYPE="Release" \
     -DCMAKE_TOOLCHAIN_FILE="./tools/ios-cmake/ios.toolchain.cmake" \
     -DIOS_PLATFORM=OS \
     -DIOS_ARCH="${IOS_ARCH}" \
@@ -182,7 +190,7 @@ function build_ios_armv8_gpu() {
   # rm -rf ../build/ios
   cmake .. \
     -B"../build/ios" \
-    -DCMAKE_BUILD_TYPE="MinSizeRel" \
+    -DCMAKE_BUILD_TYPE="Release" \
     -DCMAKE_TOOLCHAIN_FILE="./tools/ios-cmake/ios.toolchain.cmake" \
     -DIOS_PLATFORM=OS \
     -DIOS_ARCH="${IOS_ARCH}" \
