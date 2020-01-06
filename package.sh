@@ -63,6 +63,33 @@ function init() {
   echo "current commit id: " >> ../build/package/gitinfo.txt
   git rev-parse HEAD >> ../build/package/gitinfo.txt
 
+
+# merge cl to so
+merge_cl_to_so=1
+opencl_kernels="opencl_kernels.cpp"
+cd ../src/operators/kernel/cl
+if [[ -f "${opencl_kernels}" ]]; then
+    rm "${opencl_kernels}"
+fi
+python gen_code.py "${merge_cl_to_so}" > "${opencl_kernels}"
+cd -
+
+# get cl headers
+opencl_header_dir="../third_party/opencl/OpenCL-Headers"
+commit_id="320d7189b3e0e7b6a8fc5c10334c79ef364b5ef6"
+if [[ -d "$opencl_header_dir" && -d "$opencl_header_dir/.git" ]]; then
+    echo "pulling opencl headers"
+    cd $opencl_header_dir
+    git stash
+    git pull
+    git checkout $commit_id
+    cd -
+else
+    echo "cloning opencl headers"
+    rm -rf $opencl_header_dir
+    git clone https://github.com/KhronosGroup/OpenCL-Headers $opencl_header_dir
+    git checkout $commit_id
+fi
 }
 
 function check_ndk() {
