@@ -54,14 +54,14 @@ function init() {
       SCRIPT_NAME=$0
   fi
 
-
-  rm -rf ../build/package
+  rm -rf ../build/package_old
+  mv ../build/package ../build/package_old
+  # rm -rf ../build/package
   mkdir ../build/package
   rm -rf ../build/package/gitinfo.txt
+  date +%Y-%m-%d >> ../build/package/gitinfo.txt
   echo "current commit id: " >> ../build/package/gitinfo.txt
   git rev-parse HEAD >> ../build/package/gitinfo.txt
-
-
 
 }
 
