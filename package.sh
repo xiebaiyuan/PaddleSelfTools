@@ -99,6 +99,7 @@ function build_android_armv7_cpu_only() {
     -DUSE_EXCEPTION=ON \
     -DCPU=ON \
     -DGPU_CL=OFF \
+    -DPREPARE_OPENCL_RUNTIME=ON \
     -DFPGA=OFF
 
   cd ../build/armeabi-v7a-cpu && make -j 8
@@ -121,6 +122,7 @@ function build_android_armv7_gpu() {
     -DUSE_EXCEPTION=ON \
     -DCPU=ON \
     -DGPU_CL=ON \
+    -DPREPARE_OPENCL_RUNTIME=ON \
     -DFPGA=OFF
 
   cd ../build/armeabi-v7a-gpu && make -j 8
@@ -142,6 +144,7 @@ function build_android_armv8_cpu_only() {
     -DUSE_EXCEPTION=ON \
     -DCPU=ON \
     -DGPU_CL=OFF \
+    -DPREPARE_OPENCL_RUNTIME=ON \
     -DFPGA=OFF
   cd ../build/arm64-v8a-cpu && make -j 1
   cd -
@@ -162,6 +165,7 @@ function build_android_armv8_gpu() {
     -DUSE_EXCEPTION=ON \
     -DCPU=ON \
     -DGPU_CL=ON \
+    -DPREPARE_OPENCL_RUNTIME=ON \
     -DFPGA=OFF
 
   cd ../build/arm64-v8a-gpu && make -j 8
