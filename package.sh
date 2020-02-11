@@ -97,6 +97,8 @@ function build_android_armv7_cpu_only() {
     -DWITH_LOGGING=OFF \
     -DWITH_PROFILE=OFF \
     -DUSE_EXCEPTION=ON \
+    -DUSE_OPENMP=OFF \
+    -DWITH_SYMBOL=ON \
     -DCPU=ON \
     -DGPU_CL=OFF \
     -DPREPARE_OPENCL_RUNTIME=ON \
@@ -120,6 +122,8 @@ function build_android_armv7_gpu() {
     -DWITH_LOGGING=OFF \
     -DWITH_PROFILE=OFF \
     -DUSE_EXCEPTION=ON \
+    -DUSE_OPENMP=OFF \
+    -DWITH_SYMBOL=ON \
     -DCPU=ON \
     -DGPU_CL=ON \
     -DPREPARE_OPENCL_RUNTIME=ON \
@@ -142,6 +146,8 @@ function build_android_armv8_cpu_only() {
     -DWITH_LOGGING=OFF \
     -DWITH_PROFILE=OFF \
     -DUSE_EXCEPTION=ON \
+    -DUSE_OPENMP=OFF \
+    -DWITH_SYMBOL=ON \
     -DCPU=ON \
     -DGPU_CL=OFF \
     -DPREPARE_OPENCL_RUNTIME=ON \
@@ -163,6 +169,8 @@ function build_android_armv8_gpu() {
     -DWITH_LOGGING=OFF \
     -DWITH_PROFILE=OFF \
     -DUSE_EXCEPTION=ON \
+    -DUSE_OPENMP=OFF \
+    -DWITH_SYMBOL=ON \
     -DCPU=ON \
     -DGPU_CL=ON \
     -DPREPARE_OPENCL_RUNTIME=ON \
