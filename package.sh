@@ -36,7 +36,7 @@ function init() {
   if [ -z "${SCRIPT_NAME}" ]; then
     SCRIPT_NAME=$0
   fi
-
+  rm -rf ../build/arm*
   rm -rf ../build/package_old
   mv ../build/package ../build/package_old
   # rm -rf ../build/package
@@ -85,6 +85,8 @@ function check_ndk() {
 }
 
 function build_android_armv7_cpu_only() {
+  echo "$ANDROID_NDK"
+  CXX_FLAGS="-march=armv7-a -mfpu=neon -mfloat-abi=softfp -pie -fPIE -w -Wno-error=format-security"
   # rm -rf ../build/armeabi-v7a-cpu
   cmake .. \
     -B"../build/armeabi-v7a-cpu" \
@@ -92,6 +94,7 @@ function build_android_armv7_cpu_only() {
     -DCMAKE_BUILD_TYPE="Release" \
     -DCMAKE_TOOLCHAIN_FILE="./tools/android-cmake/android.toolchain.cmake" \
     -DANDROID_PLATFORM="android-19" \
+    -DCMAKE_CXX_FLAGS="${CXX_FLAGS}" \
     -DANDROID_STL=c++_static \
     -DANDROID=true \
     -DWITH_LOGGING=OFF \
@@ -104,12 +107,16 @@ function build_android_armv7_cpu_only() {
     -DPREPARE_OPENCL_RUNTIME=ON \
     -DFPGA=OFF
 
-  cd ../build/armeabi-v7a-cpu && make -j 8
+  cd ../build/armeabi-v7a-cpu && make -j 6
   cd -
 
 }
 
 function build_android_armv7_gpu() {
+  echo "$ANDROID_NDK"
+
+  CXX_FLAGS="-march=armv7-a -mfpu=neon -mfloat-abi=softfp -pie -fPIE -w -Wno-error=format-security"
+
   # rm -rf ../build/armeabi-v7a-gpu
   cmake .. \
     -B"../build/armeabi-v7a-gpu" \
@@ -117,6 +124,7 @@ function build_android_armv7_gpu() {
     -DCMAKE_BUILD_TYPE="Release" \
     -DCMAKE_TOOLCHAIN_FILE="./tools/android-cmake/android.toolchain.cmake" \
     -DANDROID_PLATFORM="android-19" \
+    -DCMAKE_CXX_FLAGS="${CXX_FLAGS}" \
     -DANDROID_STL=c++_static \
     -DANDROID=true \
     -DWITH_LOGGING=OFF \
@@ -129,11 +137,15 @@ function build_android_armv7_gpu() {
     -DPREPARE_OPENCL_RUNTIME=ON \
     -DFPGA=OFF
 
-  cd ../build/armeabi-v7a-gpu && make -j 8
+  cd ../build/armeabi-v7a-gpu && make -j 6
   cd -
 }
 
 function build_android_armv8_cpu_only() {
+  echo "$ANDROID_NDK"
+
+  CXX_FLAGS="-march=armv8-a  -pie -fPIE -w -Wno-error=format-security -llog -fuse-ld=gold"
+
   # rm -rf ../build/arm64-v8a-cpu
   cmake .. \
     -B"../build/arm64-v8a-cpu" \
@@ -142,6 +154,7 @@ function build_android_armv8_cpu_only() {
     -DCMAKE_TOOLCHAIN_FILE="./tools/android-cmake/android.toolchain.cmake" \
     -DANDROID_PLATFORM="android-19" \
     -DANDROID_STL=c++_static \
+    -DCMAKE_CXX_FLAGS="${CXX_FLAGS}" \
     -DANDROID=true \
     -DWITH_LOGGING=OFF \
     -DWITH_PROFILE=OFF \
@@ -157,6 +170,9 @@ function build_android_armv8_cpu_only() {
 }
 # MinSizeRel
 function build_android_armv8_gpu() {
+  echo "$ANDROID_NDK"
+
+  CXX_FLAGS="-march=armv8-a  -pie -fPIE -w -Wno-error=format-security -llog -fuse-ld=gold"
   # rm -rf ../build/arm64-v8a-gpu
   cmake .. \
     -B"../build/arm64-v8a-gpu" \
@@ -164,6 +180,7 @@ function build_android_armv8_gpu() {
     -DCMAKE_BUILD_TYPE="Release" \
     -DCMAKE_TOOLCHAIN_FILE="./tools/android-cmake/android.toolchain.cmake" \
     -DANDROID_PLATFORM="android-19" \
+    -DCMAKE_CXX_FLAGS="${CXX_FLAGS}" \
     -DANDROID_STL=c++_static \
     -DANDROID=true \
     -DWITH_LOGGING=OFF \
@@ -176,7 +193,7 @@ function build_android_armv8_gpu() {
     -DPREPARE_OPENCL_RUNTIME=ON \
     -DFPGA=OFF
 
-  cd ../build/arm64-v8a-gpu && make -j 8
+  cd ../build/arm64-v8a-gpu && make -j 6
   cd -
 }
 
@@ -194,7 +211,7 @@ function build_ios_armv8_cpu_only() {
     -DGPU_CL=OFF \
     -DFPGA=OFF
 
-  cd ../build/ios && make -j 8
+  cd ../build/ios && make -j 6
   cd -
 }
 
@@ -212,7 +229,7 @@ function build_ios_armv8_gpu() {
     -DGPU_CL=ON \
     -DFPGA=OFF
 
-  cd ../build/ios && make -j 8
+  cd ../build/ios && make -j 6
   cd -
 }
 
@@ -226,7 +243,7 @@ function build_linux_armv7_cpu_only() {
     -DGPU_CL=OFF \
     -DFPGA=OFF
 
-  cd ../build/armv7_linux && make -j 8
+  cd ../build/armv7_linux && make -j 6
   cd -
 }
 
@@ -240,7 +257,7 @@ function build_linux_armv7_gpu() {
     -DGPU_CL=ON \
     -DFPGA=OFF
 
-  cd ../build/armv7_linux && make -j 8
+  cd ../build/armv7_linux && make -j 6
   cd -
 }
 
@@ -281,8 +298,11 @@ function run_android_test() {
 }
 
 function cp_asserts() {
-  cp ../build/arm64-v8a-cpu/build/libpaddle-mobile.so ../build/package/libpaddle-mobile-v8a-cpu.so
-  cp ../build/arm64-v8a-gpu/build/libpaddle-mobile.so ../build/package/libpaddle-mobile-v8a-gpu.so
+  if [ "$v8" == true ]; then
+       cp ../build/arm64-v8a-cpu/build/libpaddle-mobile.so ../build/package/libpaddle-mobile-v8a-cpu.so
+       cp ../build/arm64-v8a-gpu/build/libpaddle-mobile.so ../build/package/libpaddle-mobile-v8a-gpu.so
+  fi
+
   cp ../build/armeabi-v7a-cpu/build/libpaddle-mobile.so ../build/package/libpaddle-mobile-v7a-cpu.so
   cp ../build/armeabi-v7a-gpu/build/libpaddle-mobile.so ../build/package/libpaddle-mobile-v7a-gpu.so
 
@@ -294,11 +314,12 @@ function cp_asserts() {
   zip -r paddlemobile_$now ./package/
   cd -
 
+  sh tolens.sh
 }
 
 function main() {
   local CMD=$1
-  init
+#  init
   case $CMD in
   android_armv7)
     build_android_armv7
@@ -328,7 +349,11 @@ function main() {
 # main android_armv8
 #  export NDK_ROOT=/opt/android-ndk-r17c
 
-# init
+init
 main android_armv7
-main android_armv8
+v8=true
+if [ "$v8" == true ]; then
+  echo $v8
+  main android_armv8
+fi
 cp_asserts
