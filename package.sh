@@ -298,13 +298,13 @@ function run_android_test() {
 }
 
 function cp_asserts() {
-  if [ "$v8" == true ]; then
-       cp ../build/arm64-v8a-cpu/build/libpaddle-mobile.so ../build/package/libpaddle-mobile-v8a-cpu.so
-       cp ../build/arm64-v8a-gpu/build/libpaddle-mobile.so ../build/package/libpaddle-mobile-v8a-gpu.so
+  if [[ "$v8" == "true" ]]; then
+       cp ../build/arm64-v8a-cpu/build/${libprefix}.so ../build/package/${libprefix}-v8a-cpu.so
+       cp ../build/arm64-v8a-gpu/build/${libprefix}.so ../build/package/${libprefix}-v8a-gpu.so
   fi
 
-  cp ../build/armeabi-v7a-cpu/build/libpaddle-mobile.so ../build/package/libpaddle-mobile-v7a-cpu.so
-  cp ../build/armeabi-v7a-gpu/build/libpaddle-mobile.so ../build/package/libpaddle-mobile-v7a-gpu.so
+  cp ../build/armeabi-v7a-cpu/build/${libprefix}.so ../build/package/${libprefix}-v7a-cpu.so
+  cp ../build/armeabi-v7a-gpu/build/${libprefix}.so ../build/package/${libprefix}-v7a-gpu.so
 
   cp ../src/io/paddle_inference_api.h ../build/package/paddle_inference_api.h
 
@@ -348,11 +348,12 @@ function main() {
 # main android_armv7
 # main android_armv8
 #  export NDK_ROOT=/opt/android-ndk-r17c
+libprefix=libpaddle-mobile-lens
 
 init
 main android_armv7
 v8=true
-if [ "$v8" == true ]; then
+if [[ "$v8" == "true" ]]; then
   echo $v8
   main android_armv8
 fi
