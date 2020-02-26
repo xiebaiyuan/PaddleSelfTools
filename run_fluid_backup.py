@@ -7,28 +7,26 @@ import subprocess
 import numpy as np
 import paddle.fluid as fluid
 
-is_sample_step = False
-sample_step = 1
-sample_num = 10000
-
 model_path = "/data/coremodels/Lens_YoloNano"
 checked_model_path = model_path + "/" + "checked_model"
 feed_path = model_path + "/" + "feeds"
 output_path = model_path + "/" + "outputs"
-need_save = True
+need_save = False
 diff_threshold = 0.1
-feed_all_1 = False
+feed_all_1 = True
 is_lod = False
 mobile_model_path = ""
 fast_check = False
-
+is_sample_step = False
+sample_step = 1
+sample_num = 100
 need_encrypt = False
 checked_encrypt_model_path = "checked_encrypt_model"
 output_var_filter = []
 output_key_filter = {}
 check_shape = False
 quantification = False
-quantification_fold = 100000
+quantification_fold = 1000
 architecture = "arm-v7a"
 # architecture = "arm-v8a"
 correct_persistable = False
@@ -195,7 +193,6 @@ def resave_model(feed_kv):
 # 分别加密model和params，加密key使用同一个
 
 
-# %%
 def encrypt_model():
     if not need_encrypt:
         return
@@ -219,8 +216,9 @@ def encrypt_model():
     pp_red("model encrypt error", 1)
 
 
-# %%
 # 生成feed的key-value对
+
+
 def gen_feed_kv():
     feed_kv = {}
     for feed_name in feeds:
@@ -232,8 +230,9 @@ def gen_feed_kv():
     return feed_kv
 
 
-# %%
 # 保存feed的key-value对
+
+
 def save_feed_kv(feed_kv):
     for feed_name in feed_kv:
         feed_data = feed_kv[feed_name]
@@ -247,14 +246,12 @@ def save_feed_kv(feed_kv):
         out_file.close()
 
 
-# %%
 last_feed_var_name = None
 last_feed_file_name = None
 last_feed_var_lod = None
-last_fetch_var_name = None
-
-
 # 加载feed的key-value对
+
+
 def load_feed_kv():
     if not os.path.exists(feed_path):
         return None
@@ -305,8 +302,9 @@ def load_feed_kv():
     return feed_kv
 
 
-# %%
 # 运行模型
+
+
 def run_model(feed_kv=None):
     if feed_kv is None:
         feed_kv = gen_feed_kv()
@@ -320,8 +318,9 @@ def run_model(feed_kv=None):
     return results
 
 
-# %%
 # 获取变量形状
+
+
 def get_var_shape(var_name):
     vars = prog.current_block().vars
     shape = vars[var_name].desc.shape()
@@ -332,19 +331,19 @@ def get_var_shape(var_name):
     return shape
 
 
-# %%
 # 获取输入变量形状
+
+
 def get_feed_var_shape(var_name):
     # 如果想写死输入形状，放开以下语句
     # return [1, 3, 224, 224]
     return get_var_shape(var_name)
 
 
-# %%
 persistable_cache = []
-
-
 # 所有var，全部变成持久化
+
+
 def force_all_vars_to_persistable():
     global persistable_cache
     for var_name in vars.keys():
@@ -356,8 +355,9 @@ def force_all_vars_to_persistable():
             v.persistable = True
 
 
-# %%
 # 恢复持久化属性
+
+
 def restore_all_vars_persistable():
     global persistable_cache
     for var_name in vars.keys():
@@ -369,14 +369,14 @@ def restore_all_vars_persistable():
     persistable_cache = []
 
 
-# %%
 # 获取var的数据
+
+
 def get_var_data(var_name, feed_kv=None):
     output = np.array(fluid.global_scope().var(var_name).get_tensor())
     return output
 
 
-# %%
 output_var_cache = {}
 
 
@@ -393,37 +393,26 @@ def tensor_sample(tensor):
     return sample
 
 
-# %%
-#计算mean值
 mean_dict = {}
 
 
 def calc_mean(name, tensor):
-    mean = -1
-    try:
-        step = 1
-        step = int(step)
-        sum = 0.0
-        for i in range(0, len(tensor), step):
-            sum += tensor[i]
-        mean = sum / len(tensor)
-        pp_green(
-            "{0:25}  {1:20.5f}     {2:30}".format(name, mean,
-                                                  str(get_var_shape(name))), 2)
-        mean_dict[name] = mean
-
-    except Exception as e:
-        print_e(e)
+    step = 1
+    step = int(step)
+    sum = 0.0
+    for i in range(0, len(tensor), step):
+        sum += tensor[i]
+    mean = sum / len(tensor)
+    pp_green("【{0:30}】  {1:5.5f}".format(name, mean), 2)
+    mean_dict[name] = mean
 
     return mean
 
 
-# %%
 op_cache = {}
-
-
-# %%
 # 获取每层输出的数据
+
+
 def save_all_op_output(feed_kv=None):
     force_all_vars_to_persistable()
     outputs = run_model(feed_kv=feed_kv)
@@ -654,7 +643,6 @@ for op in ops:
 pp_tab("op types : {}".format(op_types), 1)
 
 
-# %%
 def check_mobile_results(args, fuse, mem_opt):
     args = "{} {} {} {} {}".format("1" if fuse else "0",
                                    "1" if mem_opt else "0",
@@ -856,279 +844,6 @@ def check_mobile_results(args, fuse, mem_opt):
     # print(mobile_var_cache)
 
 
-# %%
-test_name = "test_nanoyolo"
-push_model_dir = "/data/local/tmp/opencl/models/nanoyolo/"
-input_name = "image"
-output_name = "save_infer_model_scale_0"
-
-
-def check_Lite_results():
-    print("")
-    print("==================================================")
-    print("")
-    pp_yellow(dot + " start inspecting paddle lite correctness & performance")
-    # args = "{} {} {} {} {}".format("1" if fuse else "0",
-    #                                "1" if mem_opt else "0",
-    #                                "1" if quantification else "0",
-    #                                quantification_fold, args)
-    input_name = last_feed_var_name
-    output_name = last_fetch_var_name
-    pp_green("input_name: {} ".format(input_name), 2)
-    pp_green("test_name: {} ".format(test_name), 2)
-    pp_green("output_name: {}".format(output_name), 2)
-    # "export GLOG_v=0; /data/local/tmp/opencl/${testname} --model_dir=${model_dir} --input_file=/data/local/tmp/opencl/${input} --output_file=/data/local/tmp/opencl/${output} --is_sample_step=false --sample_step=1 --sample_num=100 --checkscript=true --check_shape=false"
-    res = sh(
-        "adb shell \"export GLOG_v=0; /data/local/tmp/opencl/{} --model_dir={} --input_file=/data/local/tmp/opencl/{} --output_file=/data/local/tmp/opencl/{} --is_sample_step={} --sample_step={} --sample_num={} --checkscript=true --check_shape={}\""
-        .format(test_name, push_model_dir, input_name, output_name,
-                is_sample_step, sample_step, sample_num, check_shape))
-    lines = res.split("\n")
-    # for line in lines:
-    #     print(line)
-
-    # for line in lines:
-    #     if line.startswith("lite-auto-test"):
-    #         print(line)
-
-    # for line in lines:
-    #     if line.startswith("mean :"):
-    #         print(line)
-    pp_yellow(dot + dot +
-              " checking paddle lite results for {} -- {} --{} ".format(
-                  input_name, test_name, output_name))
-    lite_var_cache = {}
-    escape_list = []
-    for line in lines:
-        parts = line.split(" ")
-
-        if len(parts) < 2:
-            continue
-        if "lite-auto-test" != parts[0]:
-            continue
-
-        # if parts[1] == "load-time-cost":
-        #     pp_green("load time cost : {}".format(parts[2]), 1)
-        # elif parts[1] == "predict-time-cost":
-        #     pp_green("predict time cost : {}".format(parts[2]), 1)
-        # elif parts[1] == "preprocess-time-cost":
-        #     pp_green("preprocess time cost : {}".format(parts[2]), 1)
-        elif parts[1] == "var":
-            if parts[3] == "NOTGET":
-                escape_list.append(parts[2])
-                pass
-            else:
-                # print(str(parts))
-                var_name = parts[2]
-                values = list(map(lambda x: float(x), parts[3:]))
-                lite_var_cache[var_name] = values
-            # print(str(lite_var_cache))
-
-    pp_green("跳过的vars {} ".format(str(escape_list)), 2)
-    error_index = None
-    error_values1 = None
-    error_values2 = None
-
-    checked_names = []
-    fetch_names = []
-    for fetch in fetches:
-        fetch_names.append(fetch.name)
-    fetch_diff = 0.0
-    fetch_count = 0
-
-    for index in op_cache:
-        op_output_var_name, op = op_cache[index]
-        print("pick---{}".format(op_output_var_name))
-        if op_output_var_name in escape_list:
-
-            # print("jump---{}".format(op_output_var_name))
-            continue
-        if not op_output_var_name in output_var_cache:
-            continue
-        if not op_output_var_name in lite_var_cache:
-            continue
-        if op_output_var_name not in fetch_names:
-            continue
-        values1 = output_var_cache[op_output_var_name]
-        values2 = lite_var_cache[op_output_var_name]
-        shape = get_var_shape(op_output_var_name) if check_shape else []
-        for i in range(len(values1)):
-            v1 = values1[i]
-            v2 = values2[len(shape) + i]
-            fetch_diff += abs(v1 - v2)
-            fetch_count += 1
-
-    if fetch_count != 0:
-        pp_yellow("output avg diff : {}".format(fetch_diff / fetch_count), 1)
-    for index in op_cache:
-        op_output_var_name, op = op_cache[index]
-        pp_green("pic {}----".format(op_output_var_name), 1)
-        if True:
-            found_in_fetch = False
-            for fetch in fetches:
-                if op_output_var_name == fetch.name:
-                    found_in_fetch = True
-                    break
-            if not found_in_fetch:
-                continue
-        if op_output_var_name in escape_list:
-            # print("jump-2--{}".format(op_output_var_name))
-            continue
-        if not op_output_var_name in output_var_cache:
-            continue
-        if not op_output_var_name in lite_var_cache:
-            continue
-        if op_output_var_name not in fetch_names:
-            continue
-        values1 = output_var_cache[op_output_var_name]
-        values2 = lite_var_cache[op_output_var_name]
-        shape = get_var_shape(op_output_var_name) if check_shape else []
-        if len(values1) + len(shape) != len(values2):
-            pp_red("{}: len not match".format(op_output_var_name))
-            error_index = index
-        for i in range(len(shape)):
-            v1 = shape[i]
-            v2 = values2[i]
-            if v1 != v2:
-                pp_red("shape not match  {} and {}".format(v1, v2))
-                error_index = index
-                break
-        if error_index == None:
-            for i in range(len(values1)):
-                v1 = values1[i]
-                v2 = values2[len(shape) + i]
-                if abs(v1 - v2) > diff_threshold:
-                    pp_red("value not match  {} and {}".format(v1, v2))
-                    error_index = index
-                    break
-        checked_names.append(op_output_var_name)
-        if error_index != None:
-            error_values1 = values1
-            error_values2 = values2
-            break
-
-    print("fetch_names: {}".format(str(fetch_names)))
-    print("checked_names: {}".format(str(checked_names)))
-    if error_index == None:
-        for name in fetch_names:
-            if name not in checked_names:
-                error_index = -1
-                break
-    if error_index == None:
-        pp_green("outputs are all correct", 1)
-    # elif error_index == -1:
-    #     pp_red("outputs are missing")
-    else:
-        error_values1 = np.array(error_values1)
-        error_values2 = np.array(error_values2)
-        # pp_red("mobile op is not correct, error occurs at {}th op, op's type is {}")
-        pp_red("outputs are incorrect", 1)
-        pp_yellow("fluid results are : ", 1)
-        pp_red(str(error_values1).replace("\n", "\n" + "\t" * 1), 1)
-        pp_yellow("paddle lite results are : ", 1)
-        pp_red(str(error_values2).replace("\n", "\n" + "\t" * 1), 1)
-        if True:
-            pp_yellow("checking individual ops : ", 1)
-            error_index = None
-            error_values1 = None
-            error_values2 = None
-            checked_names = []
-            fetch_names = []
-            for fetch in fetches:
-                fetch_names.append(fetch.name)
-            pp_red("fetch_names:{}".format(str(fetch_names)), 1)
-            for index in op_cache:
-                op_output_var_name, op = op_cache[index]
-                pp_green("check {}----".format(op_output_var_name), 1)
-                if op_output_var_name in escape_list:
-                    # print("jump-2--{}".format(op_output_var_name))
-                    continue
-                if not op_output_var_name in output_var_cache:
-                    pp_red(
-                        "{}:not in output_var_cache".format(
-                            op_output_var_name), 2)
-                    continue
-                if not op_output_var_name in lite_var_cache:
-                    pp_red(
-                        "{}:not in lite_var_cache".format(op_output_var_name),
-                        2)
-                    continue
-                # if op_output_var_name not in fetch_names:
-                #     pp_red("{}:not in fetch_names".format(op_output_var_name),
-                #            2)
-                #     continue
-
-                values1 = output_var_cache[op_output_var_name]
-                values2 = lite_var_cache[op_output_var_name]
-                shape = get_var_shape(
-                    op_output_var_name) if check_shape else []
-                if len(values1) + len(shape) != len(values2):
-                    pp_red(
-                        "len(values1) + len(shape) {} and len(values2){} not match "
-                        .format((len(values1) + len(shape)), len(values2)), 2)
-                    error_index = index
-                else:
-                    pp_green(
-                        "correct len(values1) + len(shape) {} and len(values2){}  match "
-                        .format((len(values1) + len(shape)), len(values2)), 2)
-                for i in range(len(shape)):
-                    v1 = shape[i]
-                    v2 = values2[i]
-                    if v1 != v2:
-                        pp_red(
-                            "v1 != v2 ---- {} !={} not match ".format(v1, v2),
-                            2)
-                        error_index = index
-                        break
-                    else:
-                        pp_green(
-                            "correct shape1 == shape2 ---- {} !={}  match ".
-                            format(v1, v2), 2)
-                if error_index == None:
-                    for i in range(len(values1)):
-                        v1 = values1[i]
-                        v2 = values2[len(shape) + i]
-                        if ((not math.isnan(v1)) and math.isnan(v2)
-                            ) or abs(v1 - v2) > diff_threshold:
-                            pp_red(
-                                "abs(v1 - v2) > diff_threshold ---- {} - {} > {} "
-                                .format(v1, v2, diff_threshold), 2)
-                            error_index = index
-                            break
-                        else:
-                            pp_green(
-                                "correct : abs(v1 - v2) < diff_threshold ---- {} - {} < {} "
-                                .format(v1, v2, diff_threshold), 2)
-
-                checked_names.append(op_output_var_name)
-                if error_index != None:
-                    error_values1 = values1
-                    error_values2 = values2
-                    break
-            if error_index == None:
-                for name in fetch_names:
-                    if name not in checked_names:
-                        error_index = -1
-                        break
-            if error_index == None:
-                pp_green("outputs are all correct", 1)
-            elif error_index == -1:
-                pp_red("outputs are missing")
-            else:
-                error_values1 = np.array(error_values1)
-                error_values2 = np.array(error_values2)
-                # pp_red("mobile op is not correct, error occurs at {}th op, op's type is {}")
-                pp_red(
-                    "corresponding fluid op is {}th op, op's type is {}, wrong var name is {}"
-                    .format(error_index, op_cache[error_index][1].type,
-                            op_output_var_name), 1)
-                pp_red("fluid results are : ", 1)
-                pp_red(str(error_values1).replace("\n", "\n" + "\t" * 1), 1)
-                pp_yellow("paddle lite results are : ", 1)
-                pp_red(str(error_values2).replace("\n", "\n" + "\t" * 1), 1)
-    # print(output_var_cache)
-    # print(mobile_var_cache)
-
-
 #%%
 def gen_meanname_vectors(mean):
     keys = mean_dict.keys()
@@ -1169,7 +884,6 @@ def main():
     pp_yellow(dot + dot + " checking fetch info")
     for fetch in fetches:
         fetch_name = fetch.name
-        last_fetch_var_name = fetch_name
         fetch_shape = get_var_shape(fetch_name)
         pp_tab(
             "fetch var name : {}; fetch var shape : {}".format(
@@ -1205,18 +919,10 @@ def main():
                     "var {0:*^20} : {1:-^10}  mean:  {2:5.5f}\n".format(
                         var_name, shape_str, mean))
             except Exception as e:
-                pass
-                # print_e(e)
+                print_e(e)
 
     info_file.close()
     # 开始检查mobile的正确性
-    # check_mobile()
-    check_Lite_results()
-
-
-# 检查mobile
-#%%
-def check_mobile():
     print("")
     print("==================================================")
     print("")

@@ -2,7 +2,7 @@
 
 with_cmake=false
 with_make=true
-with_push=false
+with_push=true
 
 input_dir="/data/coremodels/Lens_YoloNano/feeds/"
 output_dir="/data/coremodels/Lens_YoloNano/outputs/"
@@ -10,7 +10,7 @@ input="image"
 output="save_infer_model_scale_0"
 source_model_dir="/data/coremodels/Lens_YoloNano/checked_model/saved-20200222-215656"
 model_dir="/data/local/tmp/opencl/models/nanoyolo/"
-testname="test_nanoyolo"
+testname="test_concat_image_opencl"
 
 echo "with cmake : $with_cmake"
 echo "with_make : $with_make"
@@ -46,10 +46,10 @@ if [[ "$with_push" == "true" ]]; then
     adb push lite/backends/opencl/cl_kernel/buffer/* /data/local/tmp/opencl/cl_kernel/buffer/
     adb push lite/backends/opencl/cl_kernel/image/* /data/local/tmp/opencl/cl_kernel/image/
 
-    adb shell mkdir -p ${model_dir}
-    adb push ${input_dir}${input} /data/local/tmp/opencl/${input}
-    adb push ${output_dir}${output} /data/local/tmp/opencl/${output}
-    adb push ${source_model_dir}/* ${model_dir}
+    # adb shell mkdir -p ${model_dir}
+    # adb push ${input_dir}${input} /data/local/tmp/opencl/${input}
+    # adb push ${output_dir}${output} /data/local/tmp/opencl/${output}
+    # adb push ${source_model_dir}/* ${model_dir}
 fi
 
 # adb shell mkdir -p /data/local/tmp/opencl/mobilenet_v1
@@ -63,6 +63,6 @@ fi
 
 #adb push build.lite.android.armv8.gcc.opencl/lite/kernels/opencl/test_reshape_opencl /data/local/tmp/opencl/test_reshape_opencl
 
-adb push build.lite.android.armv8.gcc.opencl/lite/api/${testname} /data/local/tmp/opencl/${testname}
+adb push build.lite.android.armv8.gcc.opencl/lite/kernels/opencl/${testname} /data/local/tmp/opencl/${testname}
 adb shell chmod +x /data/local/tmp/opencl/${testname}
-adb shell "export GLOG_v=0; /data/local/tmp/opencl/${testname} --model_dir=${model_dir} --input_file=/data/local/tmp/opencl/${input} --output_file=/data/local/tmp/opencl/${output}"
+adb shell "export GLOG_v=4; /data/local/tmp/opencl/${testname}"
