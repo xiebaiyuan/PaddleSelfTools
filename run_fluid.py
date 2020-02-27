@@ -1227,7 +1227,7 @@ def check_lite_results():
 # 检查mobile
 #%%
 def check_mobile():
-    if need_check_mobile:
+    if not need_check_mobile:
         return
     print("")
     print("==================================================")
