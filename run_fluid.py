@@ -7,17 +7,24 @@ import subprocess
 import numpy as np
 import paddle.fluid as fluid
 
-is_sample_step = False
+is_sample_step = True
 sample_step = 1
 sample_num = 10000
 
+need_save = False
+diff_threshold = 0.1
+feed_all_1 = False
+
+show_correct_check = False
+check_mobile = False
+
+need_wanted = False
+wanted_list = ["pool2d_0.tmp_0"]
 model_path = "/data/coremodels/Lens_YoloNano"
 checked_model_path = model_path + "/" + "checked_model"
 feed_path = model_path + "/" + "feeds"
 output_path = model_path + "/" + "outputs"
-need_save = True
-diff_threshold = 0.1
-feed_all_1 = False
+
 is_lod = False
 mobile_model_path = ""
 fast_check = False
@@ -638,9 +645,7 @@ def save_all_op_output(feed_kv=None):
             out_file.close()
         except:
             pass
-    pp_green(
-        "0--all the op outputs are saved into directory - 0 【{}】".format(
-            output_path), 1)
+
     restore_all_vars_persistable()
 
 
@@ -825,7 +830,11 @@ def check_mobile_results(args, fuse, mem_opt):
                         if ((not math.isnan(v1)) and math.isnan(v2)
                             ) or abs(v1 - v2) > diff_threshold:
                             error_index = index
-                            break
+                            pp_red(
+                                "error:  index={0} {1:10.6f} > diff_threshold ---- {2:10.6f} - {3:10.6f} > {4:10.6f} "
+                                .format(i, abs(v1 - v2), v1, v2,
+                                        diff_threshold), 2)
+                            # break
                 checked_names.append(op_output_var_name)
                 if error_index != None:
                     error_values1 = values1
@@ -898,6 +907,7 @@ def check_Lite_results():
                   input_name, test_name, output_name))
     lite_var_cache = {}
     escape_list = []
+
     for line in lines:
         parts = line.split(" ")
 
@@ -923,11 +933,13 @@ def check_Lite_results():
                 lite_var_cache[var_name] = values
             # print(str(lite_var_cache))
 
-    pp_green("跳过的vars {} ".format(str(escape_list)), 2)
+    pp_green("skiped vars {} ".format(str(escape_list)), 1)
     error_index = None
     error_values1 = None
     error_values2 = None
 
+    # checkfetch
+    pp_yellow(dot + dot + " check fetchs results ...   ")
     checked_names = []
     fetch_names = []
     for fetch in fetches:
@@ -937,9 +949,7 @@ def check_Lite_results():
 
     for index in op_cache:
         op_output_var_name, op = op_cache[index]
-        print("pick---{}".format(op_output_var_name))
         if op_output_var_name in escape_list:
-
             # print("jump---{}".format(op_output_var_name))
             continue
         if not op_output_var_name in output_var_cache:
@@ -948,6 +958,7 @@ def check_Lite_results():
             continue
         if op_output_var_name not in fetch_names:
             continue
+        pp_green("check fetch:---{}".format(op_output_var_name))
         values1 = output_var_cache[op_output_var_name]
         values2 = lite_var_cache[op_output_var_name]
         shape = get_var_shape(op_output_var_name) if check_shape else []
@@ -961,7 +972,7 @@ def check_Lite_results():
         pp_yellow("output avg diff : {}".format(fetch_diff / fetch_count), 1)
     for index in op_cache:
         op_output_var_name, op = op_cache[index]
-        pp_green("pic {}----".format(op_output_var_name), 1)
+        # pp_green("pic {}----".format(op_output_var_name), 1)
         if True:
             found_in_fetch = False
             for fetch in fetches:
@@ -979,6 +990,7 @@ def check_Lite_results():
             continue
         if op_output_var_name not in fetch_names:
             continue
+        pp_green("check {}".format(op_output_var_name), 1)
         values1 = output_var_cache[op_output_var_name]
         values2 = lite_var_cache[op_output_var_name]
         shape = get_var_shape(op_output_var_name) if check_shape else []
@@ -997,7 +1009,7 @@ def check_Lite_results():
                 v1 = values1[i]
                 v2 = values2[len(shape) + i]
                 if abs(v1 - v2) > diff_threshold:
-                    pp_red("value not match  {} and {}".format(v1, v2))
+                    pp_red("value not match  {} and {}".format(v1, v2), 2)
                     error_index = index
                     break
         checked_names.append(op_output_var_name)
@@ -1006,8 +1018,8 @@ def check_Lite_results():
             error_values2 = values2
             break
 
-    print("fetch_names: {}".format(str(fetch_names)))
-    print("checked_names: {}".format(str(checked_names)))
+    # pp_green("fetch_names: {}".format(str(fetch_names)), 2)
+    # pp_green("checked_names: {}".format(str(checked_names)), 2)
     if error_index == None:
         for name in fetch_names:
             if name not in checked_names:
@@ -1018,6 +1030,9 @@ def check_Lite_results():
     # elif error_index == -1:
     #     pp_red("outputs are missing")
     else:
+
+        # check ops
+        pp_yellow(dot + dot + " check ops ...   ")
         error_values1 = np.array(error_values1)
         error_values2 = np.array(error_values2)
         # pp_red("mobile op is not correct, error occurs at {}th op, op's type is {}")
@@ -1038,7 +1053,9 @@ def check_Lite_results():
             pp_red("fetch_names:{}".format(str(fetch_names)), 1)
             for index in op_cache:
                 op_output_var_name, op = op_cache[index]
-                pp_green("check {}----".format(op_output_var_name), 1)
+                pp_green("check {}  ".format(op_output_var_name), 1)
+                if (op_output_var_name not in wanted_list) and need_wanted:
+                    continue
                 if op_output_var_name in escape_list:
                     # print("jump-2--{}".format(op_output_var_name))
                     continue
@@ -1067,9 +1084,12 @@ def check_Lite_results():
                         .format((len(values1) + len(shape)), len(values2)), 2)
                     error_index = index
                 else:
-                    pp_green(
-                        "correct len(values1) + len(shape) {} and len(values2){}  match "
-                        .format((len(values1) + len(shape)), len(values2)), 2)
+                    if show_correct_check:
+                        pp_green(
+                            "correct len(values1) + len(shape) {} and len(values2){}  match "
+                            .format((len(values1) + len(shape)),
+                                    len(values2)), 2)
+
                 for i in range(len(shape)):
                     v1 = shape[i]
                     v2 = values2[i]
@@ -1080,9 +1100,11 @@ def check_Lite_results():
                         error_index = index
                         break
                     else:
-                        pp_green(
-                            "correct shape1 == shape2 ---- {} !={}  match ".
-                            format(v1, v2), 2)
+                        if show_correct_check:
+                            pp_green(
+                                "correct shape1 == shape2 ---- {} !={}  match "
+                                .format(v1, v2), 2)
+
                 if error_index == None:
                     for i in range(len(values1)):
                         v1 = values1[i]
@@ -1090,14 +1112,17 @@ def check_Lite_results():
                         if ((not math.isnan(v1)) and math.isnan(v2)
                             ) or abs(v1 - v2) > diff_threshold:
                             pp_red(
-                                "abs(v1 - v2) > diff_threshold ---- {} - {} > {} "
-                                .format(v1, v2, diff_threshold), 2)
+                                "error:  index={0} {1:10.6f} > diff_threshold ---- {2:10.6f} - {3:10.6f} > {4:10.6f} "
+                                .format(i, abs(v1 - v2), v1, v2,
+                                        diff_threshold), 2)
                             error_index = index
-                            break
+                            # break
                         else:
-                            pp_green(
-                                "correct : abs(v1 - v2) < diff_threshold ---- {} - {} < {} "
-                                .format(v1, v2, diff_threshold), 2)
+                            if show_correct_check:
+                                pp_green(
+                                    "correct : index={0}  {1:10.6f} < diff_threshold ---- {2:10.6f} - {3:10.6f} < {4:10.6f} "
+                                    .format(i, abs(v1 - v2), v1, v2,
+                                            diff_threshold), 2)
 
                 checked_names.append(op_output_var_name)
                 if error_index != None:
@@ -1210,13 +1235,15 @@ def main():
 
     info_file.close()
     # 开始检查mobile的正确性
-    # check_mobile()
+    check_mobile()
     check_Lite_results()
 
 
 # 检查mobile
 #%%
 def check_mobile():
+    if check_mobile:
+        return
     print("")
     print("==================================================")
     print("")
@@ -1249,8 +1276,8 @@ def check_mobile():
     for var_name in output_var_cache.keys():
         args += " " + var_name
     args += " " + str(1 if check_shape else 0)
-    if not fast_check:
-        check_mobile_results(args, False, False)
+    # if not fast_check:
+    check_mobile_results(args, False, False)
     #     check_mobile_results(args, False, True)
     # check_mobile_results(args, True, False)
     # check_mobile_results(args, True, True)
