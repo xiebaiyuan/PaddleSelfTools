@@ -12,16 +12,16 @@ sample_step = 1
 sample_num = 10000
 
 need_save = False
-diff_threshold = 0.1
+diff_threshold = 0.09
 feed_all_1 = False
 force_gen_inputs_outputs = False
 
 show_correct_check = False
-need_check_mobile = True
+need_check_mobile = False
 
 need_wanted = False
 wanted_list = ["pool2d_0.tmp_0"]
-model_path = "/data/coremodels/Lens_YoloNano"
+model_path = "/data/coremodels/Lens_YoloNano/"
 checked_model_path = model_path + "/" + "checked_model"
 feed_path = model_path + "/" + "feeds"
 output_path = model_path + "/" + "outputs"
@@ -944,19 +944,13 @@ def check_lite_results():
     print("==================================================")
     print("")
     pp_yellow(dot + " start inspecting paddle lite correctness & performance")
-    # args = "{} {} {} {} {}".format("1" if fuse else "0",
-    #                                "1" if mem_opt else "0",
-    #                                "1" if quantification else "0",
-    #                                quantification_fold, args)
     input_name = last_feed_var_name
     output_name = last_fetch_var_name
-    pp_green("input_name: {} ".format(input_name), 2)
-    pp_green("test_name: {} ".format(test_name), 2)
-    pp_green("output_name: {}".format(output_name), 2)
+
     pp_green(feed_names_, 1)
     feed_names_argu = ""
     for n in feed_names_:
-        feed_names_argu += "{}\n".format(n)
+        feed_names_argu += "feed names: {}\n".format(n)
         pp_green("push : {} ".format(str(n)), 1)
         push_lite(feed_path + "/" + str(n), "{}".format(str(n)))
     # push_lite(feed_path + "/" + last_feed_file_name, last_feed_file_name)
@@ -976,9 +970,8 @@ def check_lite_results():
     # for line in lines:
     #     if line.startswith("mean :"):
     #         print(line)
-    pp_yellow(dot + dot +
-              " checking paddle lite results for {} -- {} --{} ".format(
-                  input_name, test_name, output_name))
+    pp_yellow(dot + dot + " checking paddle lite results for {} -- {} ".format(
+        input_name, test_name))
     lite_var_cache = {}
 
     escape_list = []
