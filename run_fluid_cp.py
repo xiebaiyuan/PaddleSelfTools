@@ -24,8 +24,8 @@ wanted_list = [
     "blocks.2.0.se.conv_reduce.tmp_2", "blocks.2.0.se.conv_reduce.tmp_1",
     "blocks.2.0.se.conv_reduce.tmp_0"
 ]
-# model_path = "/data/coremodels/Lens_YoloNano/"
 model_name = "lens_mnasnet"
+model_name = "lens_nanoyolo"
 model_path = "/data/coremodels/" + model_name + "/"
 
 checked_model_path = model_path + "/" + "checked_model"
@@ -42,9 +42,9 @@ lite_push_model_dir = "{}/models/{}/".format(lite_exec_root, model_name)
 # push_model_dir = "/data/local/tmp/opencl/models/nanoyolo/"
 # input_name = "image"
 # output_name = "save_infer_model_scale_0"
-
-lite_source_model_dir = "/data/coremodels/{}/saved-20200302-164315/".format(
-    model_name)
+split_dir = "split_model"
+# split_dir = "saved-20200302-164315"
+lite_source_model_dir = "/data/coremodels/{}/{}/".format(model_name, split_dir)
 
 lite_src_root = os.path.abspath("./") + "/"
 if IS_DEBUG:
@@ -147,6 +147,8 @@ def push(src, dest=""):
 
 def push_lite(src, dest=""):
     result = sh("adb push {} {}".format(src, lite_exec_root + "/" + dest))
+    if result.find("adb: error") != -1:
+        pp_red("adb push err: {}".format(result))
     if IS_DEBUG:
         pp_red("{}".format(result))
 

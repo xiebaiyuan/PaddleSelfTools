@@ -55,8 +55,18 @@ function prepare_workspace() {
     # git submodule update --init --recursive
     prepare_thirdparty
 }
-
-
+function prepare_opencl_source_code() {
+    local root_dir=$1
+    local build_dir=$2
+    # in build directory
+    # Prepare opencl_kernels_source.cc file
+    GEN_CODE_PATH_OPENCL=$root_dir/lite/backends/opencl
+    rm -f GEN_CODE_PATH_OPENCL/opencl_kernels_source.cc
+    OPENCL_KERNELS_PATH=$root_dir/lite/backends/opencl/cl_kernel
+    mkdir -p ${GEN_CODE_PATH_OPENCL}
+    touch $GEN_CODE_PATH_OPENCL/opencl_kernels_source.cc
+    python $root_dir/lite/tools/cmake_tools/gen_opencl_code.py $OPENCL_KERNELS_PATH $GEN_CODE_PATH_OPENCL/opencl_kernels_source.cc
+}
 function cmake_opencl() {
     prepare_workspace
     # $1: ARM_TARGET_OS in "android" , "armlinux"
@@ -79,9 +89,8 @@ function cmake_opencl() {
     #         -DLITE_WITH_PROFILE=ON \
     # -DLITE_WITH_PRECISION_PROFILE=ON \
 }
-        # -DLITE_WITH_PROFILE=ON \
-        # -DLITE_WITH_PRECISION_PROFILE=ON \
-
+# -DLITE_WITH_PROFILE=ON \
+# -DLITE_WITH_PRECISION_PROFILE=ON \
 
 # $1: ARM_TARGET_OS in "android" , "armlinux"
 # $2: ARM_TARGET_ARCH_ABI in "armv8", "armv7" ,"armv7hf"
@@ -117,7 +126,7 @@ function build_opencl() {
     rm -rf $build_dir
     mkdir -p $build_dir
     cd $build_dir
-
+    prepare_opencl_source_code $cur_dir $build_dir
     cmake_opencl ${os} ${abi} ${lang}
     make opencl_clhpp
     # build $TESTS_FILE
@@ -145,7 +154,6 @@ function build_single() {
 function build() {
     make lite_compile_deps -j$NUM_CORES_FOR_COMPILE
 }
-
 
 testname="test_nanoyolo"
 rm -rf lite/api/paddle_use_kernels.h
