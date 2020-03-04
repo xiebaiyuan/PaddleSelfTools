@@ -6,13 +6,13 @@ import math
 import subprocess
 import numpy as np
 import paddle.fluid as fluid
-
+IS_DEBUG = False
 is_sample_step = True
 sample_step = 1
 sample_num = 10000
 
 need_save = False
-diff_threshold = 0.09
+diff_threshold = 0.1
 feed_all_1 = False
 force_gen_inputs_outputs = False
 
@@ -20,8 +20,14 @@ show_correct_check = False
 need_check_mobile = False
 
 need_wanted = False
-wanted_list = ["pool2d_0.tmp_0"]
-model_path = "/data/coremodels/Lens_YoloNano/"
+wanted_list = [
+    "blocks.2.0.se.conv_reduce.tmp_2", "blocks.2.0.se.conv_reduce.tmp_1",
+    "blocks.2.0.se.conv_reduce.tmp_0"
+]
+# model_path = "/data/coremodels/Lens_YoloNano/"
+model_name = "lens_mnasnet"
+model_path = "/data/coremodels/" + model_name + "/"
+
 checked_model_path = model_path + "/" + "checked_model"
 feed_path = model_path + "/" + "feeds"
 output_path = model_path + "/" + "outputs"
@@ -32,12 +38,19 @@ mobile_exec_root = "/data/local/tmp/bin"
 lite_exec_root = "/data/local/tmp/opencl"
 # test_name = "test_nanoyolo"
 
-push_model_dir = lite_exec_root + "/models/nanoyolo/"
+lite_push_model_dir = "{}/models/{}/".format(lite_exec_root, model_name)
 # push_model_dir = "/data/local/tmp/opencl/models/nanoyolo/"
 # input_name = "image"
 # output_name = "save_infer_model_scale_0"
 
-lite_source_model_dir = "/data/coremodels/Lens_MnasNet/saved-20200302-164315"
+lite_source_model_dir = "/data/coremodels/{}/saved-20200302-164315/".format(
+    model_name)
+
+lite_src_root = os.path.abspath("./") + "/"
+if IS_DEBUG:
+    print("lite_src_root :{}".format(lite_src_root))
+# if lite_src_root.endswith("/"):
+#     lite_src_root = lite_src_root[:-1]
 #######
 
 is_lod = False
@@ -133,7 +146,9 @@ def push(src, dest=""):
 
 
 def push_lite(src, dest=""):
-    sh("adb push {} {}".format(src, lite_exec_root + "/" + dest))
+    result = sh("adb push {} {}".format(src, lite_exec_root + "/" + dest))
+    if IS_DEBUG:
+        pp_red("{}".format(result))
 
 
 pp_yellow(dot + " start inspecting fluid model")
@@ -954,22 +969,65 @@ def check_lite_results():
     # input_name = last_feed_var_name
     # output_name = last_fetch_var_name
     test_name = "test_net_compare"
+
     pp_green(feed_names_, 1)
     feed_names_argu = ""
+    input_des = ""
+
+    vars = prog.current_block().vars
+
     for n in feed_names_:
         feed_names_argu += "feed names: {}\n".format(n)
         pp_green("push : {} ".format(str(n)), 1)
         push_lite(feed_path + "/" + str(n), "{}".format(str(n)))
+        input_des += n
+        input_des += ":"
+        shape = vars[n].desc.shape()
+        for i in range(len(shape)):
+            dim = shape[i]
+            if dim == -1:
+                shape[i] = 1
+            input_des += str(dim)
+            input_des += "_"
+        input_des = input_des[:-1]
+        input_des += ";"
+    input_des = input_des[:-1]
+    if IS_DEBUG:
+        pp_red("input_des: " + input_des)
+    sh("adb shell mkdir -p /data/local/tmp/opencl")
+    sh("adb shell mkdir -p /data/local/tmp/opencl/cl_kernel/buffer")
+    sh("adb shell mkdir -p /data/local/tmp/opencl/cl_kernel/image")
+    # adb push lite/backends/opencl/cl_kernel/cl_common.h /data/local/tmp/opencl/cl_kernel/
+    # adb push lite/backends/opencl/cl_kernel/buffer/* /data/local/tmp/opencl/cl_kernel/buffer/
+    # adb push lite/backends/opencl/cl_kernel/image/* /data/local/tmp/opencl/cl_kernel/image/
+    push_lite(lite_src_root + "lite/backends/opencl/cl_kernel/cl_common.h",
+              "cl_kernel/")
+    push_lite(lite_src_root + "lite/backends/opencl/cl_kernel/buffer/*",
+              "cl_kernel/buffer/")
+    push_lite(lite_src_root + "lite/backends/opencl/cl_kernel/image/*",
+              "cl_kernel/image/")
+
+    sh("adb shell mkdir -p {}".format(lite_push_model_dir))
+    # adb shell mkdir -p ${model_dir}
+    # adb push ${input_dir}${input} /data/local/tmp/opencl/${input}
+    # adb push ${output_dir}${output} /data/local/tmp/opencl/${output}
+    # adb push ${source_model_dir}/* ${model_dir}
+    push_lite(lite_source_model_dir + "/*", "models/{}/".format(model_name))
+    push_lite(
+        lite_src_root +
+        "build.lite.android.armv8.gcc.opencl/lite/api/test_net_compare",
+        "test_net_compare")
     # push_lite(feed_path + "/" + last_feed_file_name, last_feed_file_name)
     # "export GLOG_v=0; /data/local/tmp/opencl/${testname} --model_dir=${model_dir} --input_file=/data/local/tmp/opencl/${input} --output_file=/data/local/tmp/opencl/${output} --is_sample_step=false --sample_step=1 --sample_num=100 --checkscript=true --check_shape=false"
-    res = sh(
-        "adb shell \"export GLOG_v=0; /data/local/tmp/opencl/{} --model_dir={} --input_file={} --output_file=/data/local/tmp/opencl/{} --is_sample_step={} --sample_step={} --sample_num={} --checkscript=true --check_shape={}\""
-        .format(test_name, push_model_dir, last_feed_var_name,
-                last_fetch_var_name, is_sample_step, sample_step, sample_num,
-                check_shape))
+    exe_commend = "adb shell \"export GLOG_v=0; /data/local/tmp/opencl/{} --model_dir={} --input_file={} --output_file=/data/local/tmp/opencl/{} --is_sample_step={} --sample_step={} --sample_num={} --checkscript=true --check_shape={}\"".format(
+        test_name, lite_push_model_dir, input_des, last_fetch_var_name,
+        is_sample_step, sample_step, sample_num, check_shape)
+    res = sh(exe_commend)
     lines = res.split("\n")
-    # for line in lines:
-    #     print(line)
+    pp_yellow("Lite execute commend :  {}".format(exe_commend))
+    if IS_DEBUG:
+        for line in lines:
+            print(line)
 
     # for line in lines:
     #     if line.startswith("lite-auto-test"):
@@ -1132,17 +1190,16 @@ def check_lite_results():
             op_output_var_name, op = op_cache[index]
             pp_green("check {}  ".format(op_output_var_name), 1)
             if (op_output_var_name not in wanted_list) and need_wanted:
+                pp_green("not wanted skipped ", 2)
                 continue
             if op_output_var_name in escape_list:
-                # print("jump-2--{}".format(op_output_var_name))
+                pp_green("not get skipped ", 2)
                 continue
             if not op_output_var_name in output_var_cache:
-                pp_red("{}:not in output_var_cache".format(op_output_var_name),
-                       2)
+                pp_red("not in fluid output_var_cache skipped ", 2)
                 continue
             if not op_output_var_name in lite_var_cache:
-                pp_red("{}:not in lite_var_cache".format(op_output_var_name),
-                       2)
+                pp_red("not in lite_var_cache skipped", 2)
                 continue
             # if op_output_var_name not in fetch_names:
             #     pp_red("{}:not in fetch_names".format(op_output_var_name),
@@ -1200,11 +1257,12 @@ def check_lite_results():
                 error_values1 = values1
                 error_values2 = values2
                 break
-        if error_index == None:
-            for name in fetch_names:
-                if name not in checked_names:
-                    error_index = -1
-                    break
+        # 输出是否被检查?
+        # if error_index == None:
+        #     for name in fetch_names:
+        #         if name not in checked_names:
+        #             error_index = -1
+        #             break
         if error_index == None:
             pp_green("outputs are all correct", 1)
         elif error_index == -1:
@@ -1310,7 +1368,7 @@ def main():
     pp_yellow(dot + dot + " checking fetch info")
     for fetch in fetches:
         fetch_name = fetch.name
-        last_fetch_var_name = fetch_name
+        # last_fetch_var_name = fetch_name
         fetch_shape = get_var_shape(fetch_name)
         pp_tab(
             "fetch var name : {}; fetch var shape : {}".format(
