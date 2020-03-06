@@ -25,7 +25,7 @@ wanted_list = [
     "blocks.2.0.se.conv_reduce.tmp_0"
 ]
 # model_name = "lens_mnasnet"
-model_name = "mobilenetv1_025"
+model_name = "performancemodelv3"
 # model_name = "lens_nanoyolo"
 model_path = "/data/coremodels/" + model_name + "/"
 
@@ -714,7 +714,7 @@ pp_tab("op types : {}".format(op_types), 1)
 
 #%%
 def save_lite_inputs(lines):
-    print("save lite inputs")
+    # print("save lite inputs")
     input_cache = {}
     for line in lines:
         parts = line.split(" ")
@@ -817,10 +817,14 @@ def check_mobile_results(args, fuse, mem_opt):
         values2 = mobile_var_cache[op_output_var_name]
         shape = get_var_shape(op_output_var_name) if check_shape else []
         for i in range(len(values1)):
-            v1 = values1[i]
-            v2 = values2[len(shape) + i]
-            fetch_diff += abs(v1 - v2)
-            fetch_count += 1
+            try:
+                v1 = values1[i]
+                v2 = values2[len(shape) + i]
+                fetch_diff += abs(v1 - v2)
+                fetch_count += 1
+            except Exception as e:
+                print_e(e)
+
     if fetch_count != 0:
         pp_yellow("output avg diff : {}".format(fetch_diff / fetch_count), 1)
     for index in op_cache:
@@ -1027,7 +1031,16 @@ def check_lite_results():
         is_sample_step, sample_step, sample_num, check_shape)
     res = sh(exe_commend)
     lines = res.split("\n")
-    pp_yellow("Lite execute commend :  {}".format(exe_commend))
+    pp_yellow("\n{}  \n".format(exe_commend), 1)
+
+    pull_nb_commend = "adb pull /data/local/tmp/opencl/savemodels.nb {}/{}.nb".format(
+        model_path, model_name)
+    res = sh(pull_nb_commend)
+    if IS_DEBUG:
+        print(pull_nb_commend)
+        print(res)
+    pp_green("nb model is saved in {}  \n".format(model_path), 1)
+
     if IS_DEBUG:
         for line in lines:
             print(line)
