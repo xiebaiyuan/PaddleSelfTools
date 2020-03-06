@@ -1,26 +1,27 @@
 #!/usr/bin/python3
- 
+
 import sys
 import os
 import time
 import shutil
 import paddle.fluid as fluid
- 
+
 DEBUG = False
- 
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python ./{} <model_dir>".format(os.path.basename(__file__)))
+        print("Usage: python ./{} <model_dir>".format(
+            os.path.basename(__file__)))
         exit(0)
- 
+
     # input parameters
-    model_dir = sys.argv[1] #"/Users/yuanshuai06/Baidu/code/paddle-mobile-repo/official-20190506/download/opencl_test_src/mobilenet"
+    model_dir = sys.argv[1]  #whole dir
     timestamp = time.strftime("%Y%m%d-%H%M%S", time.localtime())
     save_model_dir = "".join([model_dir, "/", "saved-", timestamp])
     exe = fluid.Executor(fluid.CPUPlace())
- 
+
     print("[INFO] model_dir:{}".format(model_dir))
- 
+
     # set params, model file names
     params_filename = ""
     model_filename = ""
@@ -40,20 +41,25 @@ if __name__ == "__main__":
         exit(0)
     print("[INFO] model_filename:{}".format(model_filename))
     print("[INFO] params_filename:{}".format(params_filename))
- 
+
     # load model
     [inference_program, feed_target_names, fetch_targets] = \
       fluid.io.load_inference_model(dirname=model_dir, executor=exe, model_filename=model_filename, params_filename=params_filename)
- 
+
     # save params as split files
     os.mkdir(save_model_dir)
-    fluid.io.save_persistables(exe, save_model_dir, main_program=inference_program)
+    fluid.io.save_persistables(exe,
+                               save_model_dir,
+                               main_program=inference_program)
     print("[INFO] save split params file to {}".format(save_model_dir))
- 
+
     # copy model to same directory
     model_src_path = "".join([model_dir, "/", model_filename])
     model_dst_path = "".join([save_model_dir, "/", model_filename])
     shutil.copyfile(model_src_path, model_dst_path)
     if model_filename == "model":
-        shutil.copyfile(model_src_path, "".join([save_model_dir, "/__model__"]))
-    print("[INFO] rename source `model` file as `__model__` and copy from old path:{} to new path:{}".format(model_src_path, model_dst_path))
+        shutil.copyfile(model_src_path, "".join([save_model_dir,
+                                                 "/__model__"]))
+    print(
+        "[INFO] rename source `model` file as `__model__` and copy from old path:{} to new path:{}"
+        .format(model_src_path, model_dst_path))
