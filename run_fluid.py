@@ -8,7 +8,7 @@ import numpy as np
 import paddle.fluid as fluid
 IS_DEBUG = False
 is_sample_step = True
-sample_step = 1
+sample_step = 1000
 sample_num = 10000
 
 need_save = True
@@ -35,7 +35,7 @@ output_path = model_path + "/" + "outputs"
 
 mobile_exec_root = "/data/local/tmp/bin"
 #######  LITE SOURCE CONFIG
-
+need_check_model_nb = False
 lite_exec_root = "/data/local/tmp/opencl"
 # test_name = "test_nanoyolo"
 
@@ -1041,29 +1041,37 @@ def check_lite_results():
     # adb push ${input_dir}${input} /data/local/tmp/opencl/${input}
     # adb push ${output_dir}${output} /data/local/tmp/opencl/${output}
     # adb push ${source_model_dir}/* ${model_dir}
-    push_lite(lite_source_model_dir + "/*", "models/{}/".format(model_name))
+    remote_model_path = "models/{}/".format(model_name)
+    local_nb_path_opencl = "{}/{}_opencl.nb".format(model_path, model_name)
+    local_nb_path_arm = "{}/{}_arm.nb".format(model_path, model_name)
+
+    push_lite(lite_source_model_dir + "/*", remote_model_path)
+
+    if need_check_model_nb:
+        push_lite(local_nb_path_opencl, remote_model_path)
+        push_lite(local_nb_path_arm, remote_model_path)
     push_lite(
         lite_src_root +
         "build.lite.android.armv7.gcc.opencl/lite/api/test_net_compare",
         "test_net_compare")
     # push_lite(feed_path + "/" + last_feed_file_name, last_feed_file_name)
     # "export GLOG_v=0; /data/local/tmp/opencl/${testname} --model_dir=${model_dir} --input_file=/data/local/tmp/opencl/${input} --output_file=/data/local/tmp/opencl/${output} --is_sample_step=false --sample_step=1 --sample_num=100 --checkscript=true --check_shape=false"
-    exe_commend = "adb shell \"export GLOG_v=0; /data/local/tmp/opencl/{} --model_dir={} --input_file={} --output_file={} --is_sample_step={} --sample_step={} --sample_num={} --checkscript=true --check_shape={}\"".format(
+    exe_commend = "adb shell \"export GLOG_v=0; /data/local/tmp/opencl/{} --model_dir={} --input_file={} --output_file={} --is_sample_step={} --sample_step={} --sample_num={} --checkscript=true --check_shape={} --check_nb={}\"".format(
         test_name, lite_push_model_dir, input_des, output_des, is_sample_step,
-        sample_step, sample_num, check_shape)
+        sample_step, sample_num, check_shape, need_check_model_nb)
     res = sh(exe_commend)
     lines = res.split("\n")
     pp_yellow("\n{}  \n".format(exe_commend), 1)
 
-    pull_nb_commend = "adb pull /data/local/tmp/armoptmodel.nb {}/{}_arm.nb".format(
-        model_path, model_name)
+    pull_nb_commend = "adb pull /data/local/tmp/armoptmodel.nb {}".format(
+        local_nb_path_arm)
     res = sh(pull_nb_commend)
     if IS_DEBUG:
         print(pull_nb_commend)
         print(res)
 
-    pull_nb_commend = "adb pull /data/local/tmp/opencloptmodel.nb {}/{}_opencl.nb".format(
-        model_path, model_name)
+    pull_nb_commend = "adb pull /data/local/tmp/opencloptmodel.nb {}".format(
+        local_nb_path_opencl)
     res = sh(pull_nb_commend)
     if IS_DEBUG:
         print(pull_nb_commend)
@@ -1137,7 +1145,7 @@ def check_lite_results():
             continue
         if op_output_var_name not in fetch_names:
             continue
-        pp_green("check fetch:---{}".format(op_output_var_name))
+        # pp_green("{}:".format(op_output_var_name), 1)
         values1 = output_var_cache[op_output_var_name]
         values2 = lite_var_cache[op_output_var_name]
         shape = get_var_shape(op_output_var_name) if check_shape else []
@@ -1326,6 +1334,11 @@ def check_lite_results():
             pp_red(str(error_values2).replace("\n", "\n" + "\t" * 1), 1)
     # print(output_var_cache)
     # print(mobile_var_cache)
+    result = sh(
+        "cp {0}/lite/api/test_net_compare.cc {0}/PaddleMobileTools/lite/bk/".
+        format(lite_src_root))
+    if IS_DEBUG:
+        print(result)
 
 
 # 检查mobile
