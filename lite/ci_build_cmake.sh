@@ -158,5 +158,6 @@ function build() {
 testname="test_nanoyolo"
 rm -rf lite/api/paddle_use_kernels.h
 rm -rf lite/api/paddle_use_ops.h
-build_opencl "android" "armv8" "gcc"
+# build_opencl "android" "armv8" "gcc"
+build_opencl "android" "armv7" "gcc"
 cd $cur

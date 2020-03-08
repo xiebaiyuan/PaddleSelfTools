@@ -11,13 +11,13 @@ is_sample_step = True
 sample_step = 1
 sample_num = 10000
 
-need_save = False
-diff_threshold = 0.1
+need_save = True
+diff_threshold = 0.2
 feed_all_1 = False
 force_gen_inputs_outputs = False
 
 show_correct_check = False
-need_check_mobile = True
+need_check_mobile = False
 
 need_wanted = False
 wanted_list = [
@@ -25,8 +25,8 @@ wanted_list = [
     "blocks.2.0.se.conv_reduce.tmp_0"
 ]
 # model_name = "lens_mnasnet"
-model_name = "performancemodelv3"
-# model_name = "lens_nanoyolo"
+# model_name = "performancemodelv3"
+model_name = "lens_nanoyolo"
 model_path = "/data/coremodels/" + model_name + "/"
 
 checked_model_path = model_path + "/" + "checked_model"
@@ -980,9 +980,10 @@ def check_lite_results():
     pp_green(feed_names_, 1)
     feed_names_argu = ""
     input_des = ""
+    output_des = ""
 
     vars = prog.current_block().vars
-
+    pp_yellow(dot + dot + " 生成输入参数...")
     for n in feed_names_:
         feed_names_argu += "feed names: {}\n".format(n)
         pp_green("push : {} ".format(str(n)), 1)
@@ -999,8 +1000,29 @@ def check_lite_results():
         input_des = input_des[:-1]
         input_des += ";"
     input_des = input_des[:-1]
+
+    pp_yellow(dot + dot + " 生成输出参数...")
+    for fn in fetches:
+        n = fn.name
+        push_key = n.replace("/", "_")
+        feed_names_argu += "fetch names: {}\n".format(n)
+        pp_green("push : {} ".format(str(n)), 1)
+        push_lite(output_path + "/" + str(push_key),
+                  "{}".format(str(push_key)))
+        output_des += n
+        output_des += ":"
+        shape = vars[n].desc.shape()
+        for i in range(len(shape)):
+            dim = shape[i]
+            if dim == -1:
+                shape[i] = 1
+            output_des += str(dim)
+            output_des += "_"
+        output_des = output_des[:-1]
+        output_des += ";"
+    output_des = output_des[:-1]
     if IS_DEBUG:
-        pp_red("input_des: " + input_des)
+        pp_red("output_des: " + output_des)
     sh("adb shell mkdir -p /data/local/tmp/opencl")
     sh("adb shell mkdir -p /data/local/tmp/opencl/cl_kernel/buffer")
     sh("adb shell mkdir -p /data/local/tmp/opencl/cl_kernel/image")
@@ -1022,18 +1044,25 @@ def check_lite_results():
     push_lite(lite_source_model_dir + "/*", "models/{}/".format(model_name))
     push_lite(
         lite_src_root +
-        "build.lite.android.armv8.gcc.opencl/lite/api/test_net_compare",
+        "build.lite.android.armv7.gcc.opencl/lite/api/test_net_compare",
         "test_net_compare")
     # push_lite(feed_path + "/" + last_feed_file_name, last_feed_file_name)
     # "export GLOG_v=0; /data/local/tmp/opencl/${testname} --model_dir=${model_dir} --input_file=/data/local/tmp/opencl/${input} --output_file=/data/local/tmp/opencl/${output} --is_sample_step=false --sample_step=1 --sample_num=100 --checkscript=true --check_shape=false"
-    exe_commend = "adb shell \"export GLOG_v=0; /data/local/tmp/opencl/{} --model_dir={} --input_file={} --output_file=/data/local/tmp/opencl/{} --is_sample_step={} --sample_step={} --sample_num={} --checkscript=true --check_shape={}\"".format(
-        test_name, lite_push_model_dir, input_des, last_fetch_var_name,
-        is_sample_step, sample_step, sample_num, check_shape)
+    exe_commend = "adb shell \"export GLOG_v=0; /data/local/tmp/opencl/{} --model_dir={} --input_file={} --output_file={} --is_sample_step={} --sample_step={} --sample_num={} --checkscript=true --check_shape={}\"".format(
+        test_name, lite_push_model_dir, input_des, output_des, is_sample_step,
+        sample_step, sample_num, check_shape)
     res = sh(exe_commend)
     lines = res.split("\n")
     pp_yellow("\n{}  \n".format(exe_commend), 1)
 
-    pull_nb_commend = "adb pull /data/local/tmp/opencl/savemodels.nb {}/{}.nb".format(
+    pull_nb_commend = "adb pull /data/local/tmp/armoptmodel.nb {}/{}_arm.nb".format(
+        model_path, model_name)
+    res = sh(pull_nb_commend)
+    if IS_DEBUG:
+        print(pull_nb_commend)
+        print(res)
+
+    pull_nb_commend = "adb pull /data/local/tmp/opencloptmodel.nb {}/{}_opencl.nb".format(
         model_path, model_name)
     res = sh(pull_nb_commend)
     if IS_DEBUG:
