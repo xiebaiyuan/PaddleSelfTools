@@ -25,8 +25,8 @@ wanted_list = [
     "blocks.2.0.se.conv_reduce.tmp_0"
 ]
 # model_name = "lens_mnasnet"
-# model_name = "performancemodelv3"
-model_name = "lens_nanoyolo"
+model_name = "performancemodelv3"
+# model_name = "lens_nanoyolo"
 model_path = "/data/coremodels/" + model_name + "/"
 
 checked_model_path = model_path + "/" + "checked_model"
@@ -1052,7 +1052,7 @@ def check_lite_results():
         push_lite(local_nb_path_arm, remote_model_path)
     push_lite(
         lite_src_root +
-        "build.lite.android.armv7.gcc.opencl/lite/api/test_net_compare",
+        "build.self.lite.android.armv7.gcc.opencl/lite/api/test_net_compare",
         "test_net_compare")
     # push_lite(feed_path + "/" + last_feed_file_name, last_feed_file_name)
     # "export GLOG_v=0; /data/local/tmp/opencl/${testname} --model_dir=${model_dir} --input_file=/data/local/tmp/opencl/${input} --output_file=/data/local/tmp/opencl/${output} --is_sample_step=false --sample_step=1 --sample_num=100 --checkscript=true --check_shape=false"

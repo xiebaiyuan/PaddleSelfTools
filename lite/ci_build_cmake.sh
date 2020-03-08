@@ -122,7 +122,7 @@ function build_opencl() {
         return 0
     fi
 
-    build_dir=$cur_dir/build.lite.${os}.${abi}.${lang}.opencl
+    build_dir=$cur_dir/build.self.lite.${os}.${abi}.${lang}.opencl
     rm -rf $build_dir
     mkdir -p $build_dir
     cd $build_dir
