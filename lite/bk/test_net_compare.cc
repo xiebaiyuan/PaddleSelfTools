@@ -662,7 +662,7 @@ std::vector<std::string> tensor_names_nanoyolo = {"image",
                                                   // "concat_4.tmp_0",
                                                   "save_infer_model/scale_0"};
 
-std::vector<std::string> tensor_names = tensor_names_nanoyolo;
+std::vector<std::string> tensor_names = tensor_names_performancev3;
 void fill_tensor_from_path(const std::string& file, int size, float* addr) {
   std::ifstream in(file, std::ios::in);
   for (int i = 0; i < size; i++) {
@@ -850,7 +850,7 @@ void TestModelOpenCL(const std::vector<Place>& valid_places,
   if (FLAGS_check_nb) {
     // predictor.Build(
     //     model_dir + "lens_nanoyolo_opencl.nb", "", "", valid_places);
-    predictor.Build(model_dir + "lens_nanoyolo_opencl.nb",
+    predictor.Build(model_dir + "opencl.nb",
                     "",
                     "",
                     valid_places,

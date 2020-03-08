@@ -1047,9 +1047,10 @@ def check_lite_results():
 
     push_lite(lite_source_model_dir + "/*", remote_model_path)
 
-    if need_check_model_nb:
-        push_lite(local_nb_path_opencl, remote_model_path)
-        push_lite(local_nb_path_arm, remote_model_path)
+
+    push_lite(local_nb_path_opencl, remote_model_path + "/opencl.nb")
+    push_lite(local_nb_path_arm, remote_model_path + "/arm.nb")
+    
     push_lite(
         lite_src_root +
         "build.self.lite.android.armv7.gcc.opencl/lite/api/test_net_compare",
