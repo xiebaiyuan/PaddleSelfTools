@@ -7,15 +7,15 @@ import subprocess
 import numpy as np
 import paddle.fluid as fluid
 IS_DEBUG = False
-is_sample_step = True
-sample_step = 1000
-sample_num = 10000
+is_sample_step = False
+sample_step = 100
+sample_num = 20
 
 need_save = True
-diff_threshold = 0.2
+diff_threshold = 0.1
 feed_all_1 = False
 force_gen_inputs_outputs = False
-
+need_print_mean = False
 show_correct_check = False
 need_check_mobile = False
 
@@ -24,8 +24,8 @@ wanted_list = [
     "blocks.2.0.se.conv_reduce.tmp_2", "blocks.2.0.se.conv_reduce.tmp_1",
     "blocks.2.0.se.conv_reduce.tmp_0"
 ]
-# model_name = "lens_mnasnet"
-model_name = "performancemodelv3"
+model_name = "lens_mnasnet"
+# model_name = "performancemodelv3"
 # model_name = "lens_nanoyolo"
 model_path = "/data/coremodels/" + model_name + "/"
 
@@ -54,6 +54,7 @@ if IS_DEBUG:
 #     lite_src_root = lite_src_root[:-1]
 #######
 
+###### mobile config ######
 is_lod = False
 mobile_model_path = ""
 fast_check = False
@@ -69,6 +70,7 @@ quantification_fold = 100000
 architecture = "arm-v7a"
 # architecture = "arm-v8a"
 correct_persistable = False
+###### mobile config end ######
 
 np.set_printoptions(linewidth=150)
 
@@ -147,6 +149,8 @@ def push(src, dest=""):
 
 
 def push_lite(src, dest=""):
+    if IS_DEBUG:
+        pp_yellow("push{}".format(src))
     result = sh("adb push {} {}".format(src, lite_exec_root + "/" + dest))
     if result.find("adb: error") != -1:
         pp_red("adb push err: {}".format(result))
@@ -461,8 +465,8 @@ def calc_mean(name, tensor):
             sum += tensor[i]
         mean = sum / len(tensor)
         pp_green(
-            "{0:25}  {1:20.5f}     {2:30}".format(name, mean,
-                                                  str(get_var_shape(name))), 2)
+            "{0:25}  {1:20.5f}  {2:30}".format(name, mean,
+                                               str(get_var_shape(name))), 2)
         mean_dict[name] = mean
 
     except Exception as e:
@@ -523,7 +527,8 @@ def save_all_op_output(feed_kv=None):
             data = get_var_data(var_name, feed_kv=feed_kv).flatten().tolist()
             sample = tensor_sample(data)
             # 计算均值
-            calc_mean(var_name, data)
+            if need_print_mean:
+                calc_mean(var_name, data)
             output_var_cache[var_name] = (sample)
             op_cache[i] = (var_name, op)
             file_name = var_name.replace("/", "_")
@@ -1047,37 +1052,41 @@ def check_lite_results():
 
     push_lite(lite_source_model_dir + "/*", remote_model_path)
 
+    if need_check_model_nb:
+        push_lite(local_nb_path_opencl, remote_model_path + "/opencl.nb")
+        push_lite(local_nb_path_arm, remote_model_path + "/arm.nb")
 
-    push_lite(local_nb_path_opencl, remote_model_path + "/opencl.nb")
-    push_lite(local_nb_path_arm, remote_model_path + "/arm.nb")
-    
     push_lite(
         lite_src_root +
         "build.self.lite.android.armv7.gcc.opencl/lite/api/test_net_compare",
         "test_net_compare")
     # push_lite(feed_path + "/" + last_feed_file_name, last_feed_file_name)
     # "export GLOG_v=0; /data/local/tmp/opencl/${testname} --model_dir=${model_dir} --input_file=/data/local/tmp/opencl/${input} --output_file=/data/local/tmp/opencl/${output} --is_sample_step=false --sample_step=1 --sample_num=100 --checkscript=true --check_shape=false"
+    pp_yellow(dot + dot + " 手机上执行推理...")
     exe_commend = "adb shell \"export GLOG_v=0; /data/local/tmp/opencl/{} --model_dir={} --input_file={} --output_file={} --is_sample_step={} --sample_step={} --sample_num={} --checkscript=true --check_shape={} --check_nb={}\"".format(
         test_name, lite_push_model_dir, input_des, output_des, is_sample_step,
         sample_step, sample_num, check_shape, need_check_model_nb)
-    res = sh(exe_commend)
-    lines = res.split("\n")
     pp_yellow("\n{}  \n".format(exe_commend), 1)
-
-    pull_nb_commend = "adb pull /data/local/tmp/armoptmodel.nb {}".format(
-        local_nb_path_arm)
-    res = sh(pull_nb_commend)
+    res = sh(exe_commend)
     if IS_DEBUG:
-        print(pull_nb_commend)
-        print(res)
+        print("执行推理成功>")
+    lines = res.split("\n")
 
-    pull_nb_commend = "adb pull /data/local/tmp/opencloptmodel.nb {}".format(
-        local_nb_path_opencl)
-    res = sh(pull_nb_commend)
-    if IS_DEBUG:
-        print(pull_nb_commend)
-        print(res)
-    pp_green("nb model is saved in {}  \n".format(model_path), 1)
+    if need_check_model_nb:
+        pull_nb_commend = "adb pull /data/local/tmp/armoptmodel.nb {}".format(
+            local_nb_path_arm)
+        res = sh(pull_nb_commend)
+        if IS_DEBUG:
+            print(pull_nb_commend)
+            print(res)
+
+        pull_nb_commend = "adb pull /data/local/tmp/opencloptmodel.nb {}".format(
+            local_nb_path_opencl)
+        res = sh(pull_nb_commend)
+        if IS_DEBUG:
+            print(pull_nb_commend)
+            print(res)
+        pp_green("nb model is saved in {}  \n".format(model_path), 1)
 
     if IS_DEBUG:
         for line in lines:

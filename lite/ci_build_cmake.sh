@@ -135,7 +135,46 @@ function build_opencl() {
     # # test publish inference lib
     # make publish_inference
 }
+function build_opencl_gen_cl() {
+    os=$1
+    abi=$2
+    lang=$3
 
+    cur_dir=$(pwd)
+    if [[ ${os} == "armlinux" ]]; then
+        # TODO(hongming): enable compile armv7 and armv7hf on armlinux, and clang compile
+        if [[ ${lang} == "clang" ]]; then
+            echo "clang is not enabled on armlinux yet"
+            return 0
+        fi
+        if [[ ${abi} == "armv7hf" ]]; then
+            echo "armv7hf is not supported on armlinux yet"
+            return 0
+        fi
+        if [[ ${abi} == "armv7" ]]; then
+            echo "armv7 is not supported on armlinux yet"
+            return 0
+        fi
+    fi
+
+    if [[ ${os} == "android" && ${abi} == "armv7hf" ]]; then
+        echo "android do not need armv7hf"
+        return 0
+    fi
+
+    build_dir=$cur_dir/build.self.lite.${os}.${abi}.${lang}.opencl
+    # rm -rf $build_dir
+    # mkdir -p $build_dir
+    cd $build_dir
+    prepare_opencl_source_code $cur_dir $build_dir
+    # cmake_opencl ${os} ${abi} ${lang}
+    # make opencl_clhpp
+    # build $TESTS_FILE
+    # make $testname -j$NUM_CORES_FOR_COMPILE
+
+    # # test publish inference lib
+    # make publish_inference
+}
 function check_style() {
     export PATH=/usr/bin:$PATH
     #pre-commit install
@@ -160,4 +199,5 @@ rm -rf lite/api/paddle_use_kernels.h
 rm -rf lite/api/paddle_use_ops.h
 # build_opencl "android" "armv8" "gcc"
 build_opencl "android" "armv7" "gcc"
+# build_opencl_gen_cl "android" "armv7" "gcc"
 cd $cur
