@@ -6,9 +6,12 @@ import math
 import subprocess
 import numpy as np
 import paddle.fluid as fluid
-IS_DEBUG = False
-is_sample_step = False
-sample_step = 100
+from time import sleep
+from tqdm import tqdm
+
+IS_DEBUG = True
+is_sample_step = True
+sample_step = 1
 sample_num = 20
 
 need_save = True
@@ -35,6 +38,7 @@ output_path = model_path + "/" + "outputs"
 
 mobile_exec_root = "/data/local/tmp/bin"
 #######  LITE SOURCE CONFIG
+is_check_clang = True
 need_check_model_nb = False
 lite_exec_root = "/data/local/tmp/opencl"
 # test_name = "test_nanoyolo"
@@ -54,7 +58,7 @@ if IS_DEBUG:
 #     lite_src_root = lite_src_root[:-1]
 #######
 
-###### mobile config ######
+###### mobile config ######ed
 is_lod = False
 mobile_model_path = ""
 fast_check = False
@@ -141,7 +145,15 @@ def sh(command):
                             shell=True,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT)
-    return pipe.stdout.read().decode("utf-8")
+    outputs = ""
+    while True:
+        line = pipe.stdout.readline()
+        if not line:
+            break
+        # print(line.decode("utf-8"))
+        outputs += line.decode("utf-8")
+    return outputs
+    # return pipe.stdout.read().decode("utf-8")
 
 
 def push(src, dest=""):
@@ -155,7 +167,7 @@ def push_lite(src, dest=""):
     if result.find("adb: error") != -1:
         pp_red("adb push err: {}".format(result))
     if IS_DEBUG:
-        pp_red("{}".format(result))
+        pp_green("{}".format(result))
 
 
 pp_yellow(dot + " start inspecting fluid model")
@@ -1057,10 +1069,17 @@ def check_lite_results():
         push_lite(local_nb_path_opencl, remote_model_path + "/opencl.nb")
         push_lite(local_nb_path_arm, remote_model_path + "/arm.nb")
 
-    push_lite(
-        lite_src_root +
-        "build.self.lite.android.armv7.gcc.opencl/lite/api/test_net_compare",
-        "test_net_compare")
+    if is_check_clang:
+        push_lite(
+            lite_src_root +
+            "build.self.lite.android.armv7.clang.opencl/lite/api/test_net_compare",
+            "test_net_compare")
+    else:
+        push_lite(
+            lite_src_root +
+            "build.self.lite.android.armv7.gcc.opencl/lite/api/test_net_compare",
+            "test_net_compare")
+
     # push_lite(feed_path + "/" + last_feed_file_name, last_feed_file_name)
     # "export GLOG_v=0; /data/local/tmp/opencl/${testname} --model_dir=${model_dir} --input_file=/data/local/tmp/opencl/${input} --output_file=/data/local/tmp/opencl/${output} --is_sample_step=false --sample_step=1 --sample_num=100 --checkscript=true --check_shape=false"
     pp_yellow(dot + dot + " 手机上执行推理...")

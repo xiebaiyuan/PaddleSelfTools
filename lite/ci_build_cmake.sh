@@ -72,6 +72,20 @@ function cmake_opencl() {
     # $1: ARM_TARGET_OS in "android" , "armlinux"
     # $2: ARM_TARGET_ARCH_ABI in "armv8", "armv7" ,"armv7hf"
     # $3: ARM_TARGET_LANG in "gcc" "clang"
+    # cmake .. \
+    #     -DLITE_WITH_OPENCL=ON \
+    #     -DWITH_GPU=OFF \
+    #     -DWITH_MKL=OFF \
+    #     -DWITH_LITE=ON \
+    #     -DLITE_WITH_CUDA=OFF \
+    #     -DLITE_WITH_X86=OFF \
+    #     -DLITE_WITH_ARM=ON \
+    #     -DWITH_ARM_DOTPROD=ON \
+    #     -DLITE_WITH_LIGHT_WEIGHT_FRAMEWORK=ON \
+    #     -DWITH_TESTING=ON \
+    #     -DLITE_BUILD_EXTRA=ON \
+    #     -DARM_TARGET_OS=$1 -DARM_TARGET_ARCH_ABI=$2 -DARM_TARGET_LANG=$3
+
     cmake .. \
         -DLITE_WITH_OPENCL=ON \
         -DWITH_GPU=OFF \
@@ -84,6 +98,8 @@ function cmake_opencl() {
         -DLITE_WITH_LIGHT_WEIGHT_FRAMEWORK=ON \
         -DWITH_TESTING=ON \
         -DLITE_BUILD_EXTRA=ON \
+        -DLITE_SHUTDOWN_LOG=OFF \
+        -DLITE_WITH_CV=OFF \
         -DARM_TARGET_OS=$1 -DARM_TARGET_ARCH_ABI=$2 -DARM_TARGET_LANG=$3
 
     #         -DLITE_WITH_PROFILE=ON \
@@ -198,7 +214,7 @@ testname="test_nanoyolo"
 rm -rf lite/api/paddle_use_kernels.h
 rm -rf lite/api/paddle_use_ops.h
 # build_opencl "android" "armv8" "gcc"
-build_opencl "android" "armv7" "gcc"
-# build_opencl "android" "armv7" "clang"
+# build_opencl "android" "armv7" "gcc"
+build_opencl "android" "armv7" "clang"
 # build_opencl_gen_cl "android" "armv7" "gcc"
 cd $cur
