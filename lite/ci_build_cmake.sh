@@ -199,5 +199,6 @@ rm -rf lite/api/paddle_use_kernels.h
 rm -rf lite/api/paddle_use_ops.h
 # build_opencl "android" "armv8" "gcc"
 build_opencl "android" "armv7" "gcc"
+# build_opencl "android" "armv7" "clang"
 # build_opencl_gen_cl "android" "armv7" "gcc"
 cd $cur

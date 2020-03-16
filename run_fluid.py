@@ -15,7 +15,7 @@ need_save = True
 diff_threshold = 0.1
 feed_all_1 = False
 force_gen_inputs_outputs = False
-need_print_mean = False
+need_print_mean = True
 show_correct_check = False
 need_check_mobile = False
 
@@ -117,7 +117,7 @@ def pp_tab(x, level=0):
     header = ""
     for i in range(0, level):
         header += "\t"
-    print(header + str(x))
+    print(header + str(x), flush=True)
 
 
 def pp_black(x, level=0):
@@ -465,8 +465,8 @@ def calc_mean(name, tensor):
             sum += tensor[i]
         mean = sum / len(tensor)
         pp_green(
-            "{0:25}  {1:20.5f}  {2:30}".format(name, mean,
-                                               str(get_var_shape(name))), 2)
+            "{0:30}  {1:30.5f}     {2:30}".format(name, mean,
+                                                  str(get_var_shape(name))), 2)
         mean_dict[name] = mean
 
     except Exception as e:
@@ -1034,12 +1034,13 @@ def check_lite_results():
     # adb push lite/backends/opencl/cl_kernel/cl_common.h /data/local/tmp/opencl/cl_kernel/
     # adb push lite/backends/opencl/cl_kernel/buffer/* /data/local/tmp/opencl/cl_kernel/buffer/
     # adb push lite/backends/opencl/cl_kernel/image/* /data/local/tmp/opencl/cl_kernel/image/
-    push_lite(lite_src_root + "lite/backends/opencl/cl_kernel/cl_common.h",
-              "cl_kernel/")
-    push_lite(lite_src_root + "lite/backends/opencl/cl_kernel/buffer/*",
-              "cl_kernel/buffer/")
-    push_lite(lite_src_root + "lite/backends/opencl/cl_kernel/image/*",
-              "cl_kernel/image/")
+    # no need to push cl kernels
+    # push_lite(lite_src_root + "lite/backends/opencl/cl_kernel/cl_common.h",
+    #           "cl_kernel/")
+    # push_lite(lite_src_root + "lite/backends/opencl/cl_kernel/buffer/*",
+    #           "cl_kernel/buffer/")
+    # push_lite(lite_src_root + "lite/backends/opencl/cl_kernel/image/*",
+    #           "cl_kernel/image/")
 
     sh("adb shell mkdir -p {}".format(lite_push_model_dir))
     # adb shell mkdir -p ${model_dir}
@@ -1420,7 +1421,7 @@ def main():
     # 预测
     pp_yellow(dot + dot + " checking inference")
     outputs = run_model(feed_kv=feed_kv)
-    pp_tab("fluid output : {}".format(outputs), 1)
+    # pp_tab("fluid output : {}".format(outputs), 1)
     # 重新保存模型
     pp_yellow(dot + dot + " checking model correctness")
     resave_model(feed_kv=feed_kv)
@@ -1430,8 +1431,9 @@ def main():
     pp_yellow(dot + dot + " checking output result of every op")
     save_all_op_output(feed_kv=feed_kv)
 
-    pp_yellow(dot + dot + " gen check tensor vectors")
-    gen_meanname_vectors(mean_dict)
+    if need_print_mean:
+        pp_yellow(dot + dot + " gen check tensor vectors")
+        gen_meanname_vectors(mean_dict)
 
     pp_yellow(dot + dot + " checking fetch info")
     for fetch in fetches:
