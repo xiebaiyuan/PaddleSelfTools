@@ -1035,6 +1035,8 @@ void TestModelOpenCL(const std::vector<Place>& valid_places,
           sum += datai;
           sample += " " + std::to_string(data[i]);
         }
+        std::cout << " var " << name << "mean: " << sum / len << std::endl;
+
         std::cout << "lite-auto-test"
                   << " var " << name << sample << std::endl;
       } else {

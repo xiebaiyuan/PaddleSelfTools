@@ -10,13 +10,13 @@ from time import sleep
 from tqdm import tqdm
 
 IS_DEBUG = True
-is_sample_step = True
+is_sample_step = False
 sample_step = 1
 sample_num = 20
 
 need_save = True
 diff_threshold = 0.1
-feed_all_1 = False
+feed_all_1 = True
 force_gen_inputs_outputs = False
 need_print_mean = True
 show_correct_check = False
@@ -27,9 +27,9 @@ wanted_list = [
     "blocks.2.0.se.conv_reduce.tmp_2", "blocks.2.0.se.conv_reduce.tmp_1",
     "blocks.2.0.se.conv_reduce.tmp_0"
 ]
-model_name = "lens_mnasnet"
+# model_name = "lens_mnasnet"
 # model_name = "performancemodelv3"
-# model_name = "lens_nanoyolo"
+model_name = "lens_nanoyolo"
 model_path = "/data/coremodels/" + model_name + "/"
 
 checked_model_path = model_path + "/" + "checked_model"
@@ -1092,7 +1092,7 @@ def check_lite_results():
         print("执行推理成功>")
     lines = res.split("\n")
 
-    if need_check_model_nb:
+    if not need_check_model_nb:
         pull_nb_commend = "adb pull /data/local/tmp/armoptmodel.nb {}".format(
             local_nb_path_arm)
         res = sh(pull_nb_commend)
