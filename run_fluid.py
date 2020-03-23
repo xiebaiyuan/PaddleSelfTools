@@ -7,9 +7,8 @@ import subprocess
 import numpy as np
 import paddle.fluid as fluid
 from time import sleep
-from tqdm import tqdm
 
-IS_DEBUG = True
+IS_DEBUG = False
 is_sample_step = False
 sample_step = 1
 sample_num = 20
@@ -27,9 +26,9 @@ wanted_list = [
     "blocks.2.0.se.conv_reduce.tmp_2", "blocks.2.0.se.conv_reduce.tmp_1",
     "blocks.2.0.se.conv_reduce.tmp_0"
 ]
-# model_name = "lens_mnasnet"
+model_name = "lens_mnasnet"
 # model_name = "performancemodelv3"
-model_name = "lens_nanoyolo"
+#model_name = "lens_nanoyolo"
 model_path = "/data/coremodels/" + model_name + "/"
 
 checked_model_path = model_path + "/" + "checked_model"
