@@ -9,11 +9,11 @@ import paddle.fluid as fluid
 from time import sleep
 
 IS_DEBUG = False
-is_sample_step = False
+is_sample_step = True
 sample_step = 1
 sample_num = 20
 
-need_save = True
+need_save = False
 diff_threshold = 0.1
 feed_all_1 = True
 force_gen_inputs_outputs = False
@@ -26,9 +26,9 @@ wanted_list = [
     "blocks.2.0.se.conv_reduce.tmp_2", "blocks.2.0.se.conv_reduce.tmp_1",
     "blocks.2.0.se.conv_reduce.tmp_0"
 ]
-model_name = "lens_mnasnet"
+# model_name = "lens_mnasnet"
 # model_name = "performancemodelv3"
-#model_name = "lens_nanoyolo"
+model_name = "lens_nanoyolo"
 model_path = "/data/coremodels/" + model_name + "/"
 
 checked_model_path = model_path + "/" + "checked_model"
