@@ -89,6 +89,7 @@ fi
 # adb push ${build_dir}/lite/kernels/opencl/${testname} /data/local/tmp/opencl/${testname}
 adb shell chmod +x /data/local/tmp/opencl/mobilenetv1_light_api
 # model_name="caffe2pd_mobilenetv1_opencl_opt_dev_b740c549_20200323.nb"
-model_name="caffe2pd_mnasnet_opencl_opt_dev_b740c549_20200323.nb"
+# model_name="caffe2pd_mnasnet_opencl_opt_dev_b740c549_20200323.nb"
+model_name="lens_yolonano_opencl_dev_a18ca82e.nb"
 # model_name="caffe2pd_mobilenetv2_opencl_opt_dev_b740c549_20200323.nb"
-adb shell "export GLOG_v=0;cd /data/local/tmp/opencl/; export LD_LIBRARY_PATH=.; /data/local/tmp/opencl/mobilenetv1_light_api /data/local/tmp/opencl/models/"${model_name} 1 3 224 224 10 1 false
+adb shell "export GLOG_v=0;cd /data/local/tmp/opencl/; export LD_LIBRARY_PATH=.; /data/local/tmp/opencl/mobilenetv1_light_api /data/local/tmp/opencl/models/"${model_name} 1 3 416 416 10 3 false
