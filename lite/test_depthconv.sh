@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+set -o errexit
 function prepare_opencl_source_code() {
     local root_dir=$1
     # local build_dir=$2

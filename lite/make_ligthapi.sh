@@ -1,3 +1,4 @@
+set -o errexit
 cd /workspace/Paddle-Lite/build.self.lite.android.armv7.gcc.opencl
 make publish_inference -j6
 adb push

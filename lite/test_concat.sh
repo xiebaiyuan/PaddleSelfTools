@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+set -o errexit
 with_cmake=false
 with_make=true
 with_push=true
