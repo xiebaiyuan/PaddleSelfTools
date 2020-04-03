@@ -49,8 +49,8 @@ if [[ "$with_push" == "true" ]]; then
     # adb push lite/backends/opencl/cl_kernel/image/* /data/local/tmp/opencl/cl_kernel/image/
 
     adb shell mkdir -p ${model_dir}
-    adb push ${input_dir}${input} /data/local/tmp/opencl/${input}
-    adb push ${output_dir}${output} /data/local/tmp/opencl/${output}
+    # adb push ${input_dir}${input} /data/local/tmp/opencl/${input}
+    # adb push ${output_dir}${output} /data/local/tmp/opencl/${output}
     adb push ${source_model_dir}/* ${model_dir}
 fi
 
@@ -66,7 +66,7 @@ fi
 #adb push build.lite.android.armv8.gcc.opencl/lite/kernels/opencl/test_reshape_opencl /data/local/tmp/opencl/test_reshape_opencl
 
 adb push build.self.lite.android.armv7.clang.opencl/lite/api/${testname} /data/local/tmp/opencl/${testname}
-adb shell chmod +x /data/local/tmp/opencl/${testname}
+# adb shell chmod +x /data/local/tmp/opencl/${testname}
 cmd="export GLOG_v=0; /data/local/tmp/opencl/${testname} --model_dir=${model_dir} -N=1 -C=3 -H=224 -W=224"
 echo ${cmd}
 adb shell ${cmd}

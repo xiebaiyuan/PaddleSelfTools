@@ -2,7 +2,7 @@
 set -o errexit
 with_cmake=false
 with_make=true
-with_push=false
+with_push=true
 
 input_dir="/data/coremodels/lens_nanoyolo/feeds/"
 output_dir="/data/coremodels/lens_nanoyolo/outputs/"
@@ -49,8 +49,8 @@ if [[ "$with_push" == "true" ]]; then
     # adb push lite/backends/opencl/cl_kernel/image/* /data/local/tmp/opencl/cl_kernel/image/
 
     adb shell mkdir -p ${model_dir}
-    adb push ${input_dir}${input} /data/local/tmp/opencl/${input}
-    adb push ${output_dir}${output} /data/local/tmp/opencl/${output}
+    # adb push ${input_dir}${input} /data/local/tmp/opencl/${input}
+    # adb push ${output_dir}${output} /data/local/tmp/opencl/${output}
     adb push ${source_model_dir}/* ${model_dir}
 fi
 
