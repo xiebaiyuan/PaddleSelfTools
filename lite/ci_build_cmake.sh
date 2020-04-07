@@ -1,6 +1,24 @@
 #!/bin/bash
 # The git version of CI is 2.7.4. This script is not compatible with git version 1.7.1.
 set -ex
+echo ">>>>"
+read -r -p "Are You Sure? [Y/n] " input
+
+case $input in
+[yY][eE][sS] | [yY])
+    echo "Yes"
+    ;;
+
+[nN][oO] | [nN])
+    echo "No"
+    exit 1
+    ;;
+
+*)
+    echo "Invalid input..."
+    exit 1
+    ;;
+esac
 
 TESTS_FILE="./lite_tests.txt"
 LIBS_FILE="./lite_libs.txt"
@@ -100,9 +118,10 @@ function cmake_opencl() {
         -DLITE_BUILD_EXTRA=ON \
         -DLITE_SHUTDOWN_LOG=OFF \
         -DLITE_WITH_CV=OFF \
-        -DLITE_WITH_PROFILE=ON \
         -DLITE_WITH_PRECISION_PROFILE=ON \
         -DARM_TARGET_OS=$1 -DARM_TARGET_ARCH_ABI=$2 -DARM_TARGET_LANG=$3
+
+    # -DLITE_WITH_PROFILE=ON \
 
 }
 
