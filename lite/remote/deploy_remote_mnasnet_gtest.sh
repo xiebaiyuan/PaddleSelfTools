@@ -5,14 +5,12 @@ set -o errexit
 #build_dir=build.lite.android.armv7.clang.opencl
 build_dir=build.self.lite.android.armv7.clang.opencl
 testname="test_mobilenetv1"
-model_dir="/data/local/tmp/opencl/models/lens_mnasnet_fluid_20200319"
+model_dir="/data/local/tmp/opencl/models/5_opencl_models_opt_dev_a50a8bea_20200319/lens_mnasnet_fluid_20200319"
 pwd
 scp Ubuntu_home:/workspace/Paddle-Lite/${build_dir}/lite/api/${testname} ./
-
 
 adb push ./${testname} /data/local/tmp/opencl/${testname}
 
 cmd="export GLOG_v=0; /data/local/tmp/opencl/${testname} --model_dir=${model_dir} -N=1 -C=3 -H=224 -W=224"
 echo ${cmd}
 adb shell ${cmd}
-

@@ -67,6 +67,6 @@ fi
 
 adb push build.self.lite.android.armv7.clang.opencl/lite/api/${testname} /data/local/tmp/opencl/${testname}
 # adb shell chmod +x /data/local/tmp/opencl/${testname}
-cmd="export GLOG_v=0; /data/local/tmp/opencl/${testname} --model_dir=${model_dir} -N=1 -C=3 -H=416 -W=416"
+cmd="export VALGRIND_LIB=/data/local/tmp/opencl/install_valgrind_arm/data/local/Inst/lib/valgrind/; export GLOG_v=0; /data/local/tmp/opencl/install_valgrind_arm/data/local/Inst/bin/valgrind --tool=memcheck --leak-check=full /data/local/tmp/opencl/${testname} --model_dir=${model_dir} -N=1 -C=3 -H=416 -W=416"
 echo ${cmd}
 adb shell ${cmd}
