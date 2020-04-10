@@ -92,4 +92,6 @@ fi
 model_name="5_opencl_models_opt_dev_a50a8bea_20200319/lens_mnasnet_opencl_opt_dev_a50a8bea_20200319.nb"
 # model_name="lens_yolonano_opencl_dev_a18ca82e.nb"
 # model_name="caffe2pd_mobilenetv2_opencl_opt_dev_b740c549_20200323.nb"
-adb shell "export GLOG_v=0;cd /data/local/tmp/opencl/; export LD_LIBRARY_PATH=.; /data/local/tmp/opencl/mobilenetv1_light_api /data/local/tmp/opencl/models/"${model_name} 1 3 224 224 1 0 false
+cmd="export GLOG_v=0;cd /data/local/tmp/opencl/; export LD_LIBRARY_PATH=.; /data/local/tmp/opencl/mobilenetv1_light_api /data/local/tmp/opencl/models/${model_name} 1 3 224 224 1 0 false "
+echo ${cmd}
+adb shell ${cmd}
