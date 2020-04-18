@@ -67,6 +67,7 @@ fi
 
 adb push build.self.lite.android.armv7.clang.opencl/lite/api/${testname} /data/local/tmp/opencl/${testname}
 # adb shell chmod +x /data/local/tmp/opencl/${testname}
-cmd="export GLOG_v=0; /data/local/tmp/opencl/${testname} --model_dir=${model_dir} -N=1 -C=3 -H=416 -W=416"
+cmd="export GLOG_v=0; /data/local/tmp/opencl/${testname} --model_dir=${model_dir} -N=1 -C=3 -H=416 -W=416 --optimized_model=/data/local/tmp/nanoyolo_self"
 echo ${cmd}
 adb shell ${cmd}
+adb pull /data/local/tmp/nanoyolo_self.nb

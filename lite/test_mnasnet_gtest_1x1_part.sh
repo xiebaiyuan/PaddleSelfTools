@@ -1,58 +1,48 @@
 #!/usr/bin/env bash
 set -o errexit
-function prepare_opencl_source_code() {
-    local root_dir=$1
-    # local build_dir=$2
-    # in build directory
-    # Prepare opencl_kernels_source.cc file
-    echo "update cl kernel..."
-    GEN_CODE_PATH_OPENCL=$root_dir/lite/backends/opencl
-    rm -f GEN_CODE_PATH_OPENCL/opencl_kernels_source.cc
-    OPENCL_KERNELS_PATH=$root_dir/lite/backends/opencl/cl_kernel
-    mkdir -p ${GEN_CODE_PATH_OPENCL}
-    touch $GEN_CODE_PATH_OPENCL/opencl_kernels_source.cc
-    python $root_dir/lite/tools/cmake_tools/gen_opencl_code.py $OPENCL_KERNELS_PATH $GEN_CODE_PATH_OPENCL/opencl_kernels_source.cc
-}
-
 with_cmake=false
 with_make=true
 with_push=true
+# source_model_dir="/data/coremodels/lens_mnasnet/split_model"
+source_model_dir="/data/self_model_gen/mnasnet_self_saved-20200417-170543"
+# model_dir="/data/local/tmp/opencl/models/lens_mnasnet/"
+model_dir="/data/local/tmp/opencl/models/lens_mnasnet_caffe_part/"
+# source_model_dir="/data/MnasNet-caffe/pd_model/inference_model"
+# model_dir="/data/local/tmp/opencl/models/lens_mnasnet_self/"
+input="image"
+output="save_infer_model_scale_0"
+# source_model_dir="/data/MnasNet-caffe/pd_model/model_with_code/lens_mnasnet_part"
 
-# input_dir="/data/coremodels/Lens_YoloNano/feeds/"
-# output_dir="/data/coremodels/Lens_YoloNano/outputs/"
-# input="image"
-# output="save_infer_model_scale_0"
-# source_model_dir="/data/coremodels/Lens_YoloNano/checked_model/saved-20200222-215656"
-# model_dir="/data/local/tmp/opencl/models/nanoyolo/"
-testname="test_conv_image_opencl"
+# model_dir="/data/local/tmp/opencl/models/aaaaaaaa"
+testname="test_mobilenetv1"
 
 echo "with cmake : $with_cmake"
 echo "with_make : $with_make"
 echo "with_push : $with_push"
-# echo "input_dir : $input_dir"
-# echo "output_dir : $output_dir"
-# echo "input : $input"
-# echo "output : $output"
-# echo "source_model_dir : $source_model_dir"
-# echo "model_dir : $model_dir"
+echo "input_dir : $input_dir"
+echo "output_dir : $output_dir"
+echo "input : $input"
+echo "output : $output"
+echo "source_model_dir : $source_model_dir"
+echo "model_dir : $model_dir"
 echo "testname : $testname"
 
 pwd
 if [[ "$with_cmake" == "true" ]]; then
-    cd PaddleMobileTools
     ./ci_build_cmake.sh
-    cd -
 fi
 
 if [[ "$with_make" == "true" ]]; then
-    prepare_opencl_source_code $(pwd)
+    python ./lite/tools/cmake_tools/gen_opencl_code.py ./lite/backends/opencl/cl_kernel ./lite/backends/opencl/opencl_kernels_source.cc
     cd build.self.lite.android.armv7.clang.opencl
-    make $testname -j$6
+
+    make $testname -j$4
     cd -
 fi
 
 if [[ "$with_push" == "true" ]]; then
-    # 在/data/local/tmp目录下创建OpenCL文件目录
+    #  do not need upload .cl
+    # # 在/data/local/tmp目录下创建OpenCL文件目录
     # adb shell mkdir -p /data/local/tmp/opencl
     # adb shell mkdir -p /data/local/tmp/opencl/cl_kernel/buffer
     # adb shell mkdir -p /data/local/tmp/opencl/cl_kernel/image
@@ -61,11 +51,11 @@ if [[ "$with_push" == "true" ]]; then
     # adb push lite/backends/opencl/cl_kernel/cl_common.h /data/local/tmp/opencl/cl_kernel/
     # adb push lite/backends/opencl/cl_kernel/buffer/* /data/local/tmp/opencl/cl_kernel/buffer/
     # adb push lite/backends/opencl/cl_kernel/image/* /data/local/tmp/opencl/cl_kernel/image/
-    echo "with push"
-    # adb shell mkdir -p ${model_dir}
+
+    adb shell mkdir -p ${model_dir}
     # adb push ${input_dir}${input} /data/local/tmp/opencl/${input}
     # adb push ${output_dir}${output} /data/local/tmp/opencl/${output}
-    # adb push ${source_model_dir}/* ${model_dir}
+    adb push ${source_model_dir}/* ${model_dir}
 fi
 
 # adb shell mkdir -p /data/local/tmp/opencl/mobilenet_v1
@@ -79,6 +69,11 @@ fi
 
 #adb push build.lite.android.armv8.gcc.opencl/lite/kernels/opencl/test_reshape_opencl /data/local/tmp/opencl/test_reshape_opencl
 
-adb push build.self.lite.android.armv7.clang.opencl/lite/kernels/opencl/${testname} /data/local/tmp/opencl/${testname}
+adb push build.self.lite.android.armv7.clang.opencl/lite/api/${testname} /data/local/tmp/opencl/${testname}
 # adb shell chmod +x /data/local/tmp/opencl/${testname}
-adb shell "export GLOG_v=3; /data/local/tmp/opencl/${testname}"
+cmd="export GLOG_v=4; /data/local/tmp/opencl/${testname} --model_dir=${model_dir} -N=1 -C=32 -H=112 -W=112 --optimized_model=/data/local/tmp/mnasetnet_caffee"
+echo ${cmd}
+adb shell ${cmd}
+adb pull /data/local/tmp/mnasetnet_caffee.nb ./
+md5sum mnasetnet_caffee.nb
+cp mnasetnet_caffee.nb ${source_model_dir}

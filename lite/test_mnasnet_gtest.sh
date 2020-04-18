@@ -3,13 +3,18 @@ set -o errexit
 with_cmake=false
 with_make=true
 with_push=true
-
-input_dir="/data/coremodels/lens_nanoyolo/feeds/"
-output_dir="/data/coremodels/lens_nanoyolo/outputs/"
+source_model_dir="/data/coremodels/lens_mnasnet/split_model"
+# source_model_dir="/data/self_model_gen/mnasnet_self_saved-20200417-170543"
+# source_model_dir="/data/self_model_gen/mnasnet_self_saved-20200417-170927"
+model_dir="/data/local/tmp/opencl/models/lens_mnasnet/"
+# model_dir="/data/local/tmp/opencl/models/lens_mnasnet_caffe_part/"
+# source_model_dir="/data/MnasNet-caffe/pd_model/inference_model"
+# model_dir="/data/local/tmp/opencl/models/lens_mnasnet_self/"
 input="image"
 output="save_infer_model_scale_0"
-source_model_dir="/data/coremodels/lens_mnasnet/split_model"
-model_dir="/data/local/tmp/opencl/models/lens_mnasnet/"
+# source_model_dir="/data/MnasNet-caffe/pd_model/model_with_code/lens_mnasnet_part"
+
+# model_dir="/data/local/tmp/opencl/models/aaaaaaaa"
 testname="test_mobilenetv1"
 
 echo "with cmake : $with_cmake"
@@ -67,6 +72,9 @@ fi
 
 adb push build.self.lite.android.armv7.clang.opencl/lite/api/${testname} /data/local/tmp/opencl/${testname}
 # adb shell chmod +x /data/local/tmp/opencl/${testname}
-cmd="export GLOG_v=0; /data/local/tmp/opencl/${testname} --model_dir=${model_dir} -N=1 -C=3 -H=224 -W=224"
+cmd="export GLOG_v=0; /data/local/tmp/opencl/${testname} --model_dir=${model_dir} -N=1 -C=3 -H=224 -W=224 --optimized_model=/data/local/tmp/mnasetnet_caffee"
 echo ${cmd}
 adb shell ${cmd}
+adb pull /data/local/tmp/mnasetnet_caffee.nb ./
+md5sum mnasetnet_caffee.nb
+cp mnasetnet_caffee.nb ${source_model_dir}
