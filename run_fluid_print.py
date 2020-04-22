@@ -21,7 +21,7 @@ need_check_mobile = False
 
 need_wanted = False
 wanted_list = ["pool2d_0.tmp_0"]
-model_path = "/data/models/mobilenetv1_0.25/combined"
+model_path = "/data/self_model_gen/mnasnet_self_firset3_withbias_bn_relu6_saved-20200421-204631"
 checked_model_path = model_path + "/" + "checked_model"
 feed_path = model_path + "/" + "feeds"
 output_path = model_path + "/" + "outputs"
@@ -1341,10 +1341,10 @@ def main():
                 print_e(e)
 
     info_file.close()
-    # 开始检查mobile的正确性
-    check_mobile()
-    # 开始检查lite的正确性
-    check_lite_results()
+    # # 开始检查mobile的正确性
+    # check_mobile()
+    # # 开始检查lite的正确性
+    # check_lite_results()
 
 
 if __name__ == "__main__":
