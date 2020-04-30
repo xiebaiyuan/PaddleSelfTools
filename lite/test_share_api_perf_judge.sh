@@ -89,9 +89,13 @@ fi
 # adb push ${build_dir}/lite/kernels/opencl/${testname} /data/local/tmp/opencl/${testname}
 # adb shell chmod +x /data/local/tmp/opencl/mobilenetv1_light_api
 # model_name="caffe2pd_mobilenetv1_opencl_opt_dev_b740c549_20200323.nb"
-model_name="5_opencl_models_opt_dev_a50a8bea_20200319/lens_mnasnet_opencl_opt_dev_a50a8bea_20200319.nb"
+model_name="pfj_cpu.nb"
 # model_name="lens_yolonano_opencl_dev_a18ca82e.nb"
 # model_name="caffe2pd_mobilenetv2_opencl_opt_dev_b740c549_20200323.nb"
-cmd="export GLOG_v=0;cd /data/local/tmp/opencl/; export LD_LIBRARY_PATH=.; /data/local/tmp/opencl/mobilenetv1_light_api /data/local/tmp/opencl/models/${model_name} 1 3 224 224 100 10 false "
+cmd="export GLOG_v=0;cd /data/local/tmp/opencl/; export LD_LIBRARY_PATH=.; /data/local/tmp/opencl/mobilenetv1_light_api /data/local/tmp/opencl/models/${model_name} 1 3 224 224 50 10 false "
+echo ${cmd}
+adb shell ${cmd}
+model_name="pfj_gpu.nb"
+cmd="export GLOG_v=0;cd /data/local/tmp/opencl/; export LD_LIBRARY_PATH=.; /data/local/tmp/opencl/mobilenetv1_light_api /data/local/tmp/opencl/models/${model_name} 1 3 224 224 50 10 false "
 echo ${cmd}
 adb shell ${cmd}
