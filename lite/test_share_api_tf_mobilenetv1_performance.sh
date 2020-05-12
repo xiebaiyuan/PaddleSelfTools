@@ -49,7 +49,7 @@ if [[ "$with_make" == "true" ]]; then
     # cd ${build_dir}/inference_lite_lib.android.armv7.opencl/cxx/lib
     cd ${build_dir}/lite/api
     adb push libpaddle_light_api_shared.so /data/local/tmp/opencl
-    cp libpaddle_light_api_shared.so /share
+    # cp libpaddle_light_api_shared.so /share
     cd -
     cd ${build_dir}/inference_lite_lib.android.armv7.opencl/demo/cxx/mobile_light
     make -j6
@@ -89,9 +89,9 @@ fi
 # adb push ${build_dir}/lite/kernels/opencl/${testname} /data/local/tmp/opencl/${testname}
 # adb shell chmod +x /data/local/tmp/opencl/mobilenetv1_light_api
 # model_name="caffe2pd_mobilenetv1_opencl_opt_dev_b740c549_20200323.nb"
-model_name="5_opencl_models_opt_dev_a50a8bea_20200319/lens_mnasnet_opencl_opt_dev_a50a8bea_20200319.nb"
+model_name="/data/local/tmp/opencl/benchmodels26/tf2pd_mobilenetv1_opencl_fp32_opt_releasev2.6_b8234efb_20200423.nb"
 # model_name="lens_yolonano_opencl_dev_a18ca82e.nb"
 # model_name="caffe2pd_mobilenetv2_opencl_opt_dev_b740c549_20200323.nb"
-cmd="export GLOG_v=0;cd /data/local/tmp/opencl/; export LD_LIBRARY_PATH=.; /data/local/tmp/opencl/mobilenetv1_light_api /data/local/tmp/opencl/models/${model_name} 1 3 224 224 100 10 0 "
+cmd="export GLOG_v=0;cd /data/local/tmp/opencl/; export LD_LIBRARY_PATH=.; /data/local/tmp/opencl/mobilenetv1_light_api ${model_name}  1 3 224 224 1000 20 0"
 echo ${cmd}
 adb shell ${cmd}
