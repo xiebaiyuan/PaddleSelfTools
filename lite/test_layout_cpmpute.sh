@@ -16,7 +16,7 @@ function prepare_opencl_source_code() {
 
 with_cmake=false
 with_make=true
-with_push=true
+with_push=false
 
 # input_dir="/data/coremodels/Lens_YoloNano/feeds/"
 # output_dir="/data/coremodels/Lens_YoloNano/outputs/"

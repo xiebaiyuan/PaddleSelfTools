@@ -16,7 +16,7 @@ function prepare_opencl_source_code() {
 
 with_cmake=false
 with_make=true
-with_push=true
+with_push=false
 
 # input_dir="/data/coremodels/Lens_YoloNano/feeds/"
 # output_dir="/data/coremodels/Lens_YoloNano/outputs/"
@@ -36,7 +36,7 @@ echo "with_push : $with_push"
 # echo "source_model_dir : $source_model_dir"
 # echo "model_dir : $model_dir"
 echo "testname : $testname"
-
+device_id="f5caa946"
 pwd
 if [[ "$with_cmake" == "true" ]]; then
     cd PaddleMobileTools
@@ -79,6 +79,6 @@ fi
 
 #adb push build.lite.android.armv8.gcc.opencl/lite/kernels/opencl/test_reshape_opencl /data/local/tmp/opencl/test_reshape_opencl
 
-adb push build.self.lite.android.armv7.clang.opencl/lite/kernels/opencl/${testname} /data/local/tmp/opencl/${testname}
-adb shell chmod +x /data/local/tmp/opencl/${testname}
-adb shell "export GLOG_v=2; /data/local/tmp/opencl/${testname}"
+adb -s ${device_id} push build.self.lite.android.armv7.clang.opencl/lite/kernels/opencl/${testname} /data/local/tmp/opencl/${testname}
+adb -s ${device_id} shell chmod +x /data/local/tmp/opencl/${testname}
+adb -s ${device_id} shell "export GLOG_v=2; /data/local/tmp/opencl/${testname}"
