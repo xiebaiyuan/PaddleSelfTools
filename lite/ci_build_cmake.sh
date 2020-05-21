@@ -118,6 +118,7 @@ function cmake_opencl() {
         -DLITE_BUILD_EXTRA=ON \
         -DLITE_SHUTDOWN_LOG=OFF \
         -DLITE_WITH_CV=OFF \
+        -DLITE_WITH_PROFILE=ON \
         -DLITE_WITH_PRECISION_PROFILE=ON \
         -DARM_TARGET_OS=$1 -DARM_TARGET_ARCH_ABI=$2 -DARM_TARGET_LANG=$3
 

@@ -22,7 +22,7 @@ testname="paddle_light_api_shared"
 build_dir=build.lite.android.armv7.clang.opencl
 # f5caa946	device
 # 66J5T18A19021677	device
-device_id="f5caa946"
+device_id="66J5T18A19021677"
 # device_id="66J5T18A19021677"
 
 echo "with cmake : $with_cmake"
