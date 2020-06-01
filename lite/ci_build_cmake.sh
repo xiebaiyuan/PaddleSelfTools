@@ -120,6 +120,9 @@ function cmake_opencl() {
         -DLITE_WITH_CV=OFF \
         -DLITE_WITH_PROFILE=ON \
         -DLITE_WITH_PRECISION_PROFILE=ON \
+        -DLITE_WITH_STATIC_CUDA=OFF \
+        -DLITE_WITH_OPENMP=OFF \
+        -DWITH_DSO=OFF \
         -DARM_TARGET_OS=$1 -DARM_TARGET_ARCH_ABI=$2 -DARM_TARGET_LANG=$3
 
     # -DLITE_WITH_PROFILE=ON \
@@ -127,7 +130,7 @@ function cmake_opencl() {
 }
 
 # -DLITE_WITH_PROFILE=ON \
-# -DLITE_WITH_PRECISION_PROFILE=ON \
+# -DLITE_WITH_STATIC_CUDA=ON \
 
 # $1: ARM_TARGET_OS in "android" , "armlinux"
 # $2: ARM_TARGET_ARCH_ABI in "armv8", "armv7" ,"armv7hf"

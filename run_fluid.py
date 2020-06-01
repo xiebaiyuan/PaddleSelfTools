@@ -28,8 +28,8 @@ wanted_list = [
 ]
 # model_name = "lens_mnasnet"
 # model_name = "performancemodelv3"
-model_name = "lens_nanoyolo"
-model_path = "/data/coremodels/" + model_name + "/"
+model_name = "model_porn"
+model_path = "/data/" + model_name + "/"
 
 checked_model_path = model_path + "/" + "checked_model"
 feed_path = model_path + "/" + "feeds"
