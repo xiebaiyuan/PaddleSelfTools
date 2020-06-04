@@ -15,7 +15,7 @@ with_cmake=false
 with_make=true
 with_push=false
 
-testname="test_pixel_shuffle_image_opencl"
+testname="test_expand_image_opencl"
 
 echo "with cmake : $with_cmake"
 echo "with make : $with_make"
