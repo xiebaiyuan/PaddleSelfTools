@@ -3,7 +3,7 @@ set -o errexit
 
 #build_dir=build.self.withcv.lite.android.armv7.gcc.opencl
 #build_dir=build.lite.android.armv7.clang.opencl
-build_dir=build.self.lite.android.armv7.clang.opencl
+build_dir=build.self.lite.android.armv7.gcc.opencl
 testname="test_activation_image_opencl"
 # model_dir="/data/local/tmp/opencl/models/lens_yolonano_fluid_20200319"
 pwd
