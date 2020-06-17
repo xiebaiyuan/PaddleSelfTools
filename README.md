@@ -1,4 +1,4 @@
-# PaddleLiteTools
+# PaddleSelfTools
 
 collections of tools to develop paddle lite & paddle mobile
 
