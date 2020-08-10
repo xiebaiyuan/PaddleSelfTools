@@ -1,3 +1,4 @@
+set -ex
 echo '关闭omp.'
 sed -i 's/LITE_WITH_OPENMP "Enable OpenMP in lite framework" ON/LITE_WITH_OPENMP "Enable OpenMP in lite framework" OFF/' CMakeLists.txt
 cat CMakeLists.txt | grep "Enable OpenMP"
@@ -49,3 +50,6 @@ echo 'opencl v7'
 echo '打开omp'
 sed -i 's/LITE_WITH_OPENMP "Enable OpenMP in lite framework" OFF/LITE_WITH_OPENMP "Enable OpenMP in lite framework" ON/' CMakeLists.txt
 cat CMakeLists.txt | grep "Enable OpenMP"
+
+echo '打包发布'
+./PaddleSelfTools/release/build_lite_release_zip.sh
