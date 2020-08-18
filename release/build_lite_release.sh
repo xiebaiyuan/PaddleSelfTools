@@ -1,4 +1,10 @@
 set -ex
+git fetch
+git merge
+export NDK_ROOT=/opt/android-ndk-r17c
+
+echo "NDK_ROOT: ${NDK_ROOT}"
+echo "ANDROID_NDK: ${ANDROID_NDK}"
 echo '关闭omp.'
 sed -i 's/LITE_WITH_OPENMP "Enable OpenMP in lite framework" ON/LITE_WITH_OPENMP "Enable OpenMP in lite framework" OFF/' CMakeLists.txt
 cat CMakeLists.txt | grep "Enable OpenMP"
@@ -46,6 +52,9 @@ echo 'opencl v7'
 --with_log=OFF \
 --with_extra=ON \
 --with_opencl=ON
+
+./PaddleSelfTools/release/build_lite_opt.sh
+
 
 echo '打开omp'
 sed -i 's/LITE_WITH_OPENMP "Enable OpenMP in lite framework" OFF/LITE_WITH_OPENMP "Enable OpenMP in lite framework" ON/' CMakeLists.txt

@@ -29,7 +29,7 @@ mkdir paddlelite_v7
 cp -r ../../build.lite.android.armv7.clang.opencl/inference_lite_lib.android.armv7.opencl/cxx/* ./paddlelite_v7
 mkdir paddlelite_v8
 cp -r ../../build.lite.android.armv8.clang.opencl/inference_lite_lib.android.armv8.opencl/cxx/* ./paddlelite_v8
-
+cp -r ../../build.opt/lite/api/opt ./
 mkdir mml_deps
 cd mml_deps
 
