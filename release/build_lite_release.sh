@@ -2,6 +2,17 @@ set -ex
 git fetch
 git merge
 
+(read last_commit < 'last_commit.log') || true
+echo "line : $last_commit"
+
+current_commit=$(git rev-parse HEAD)
+if [ "$current_commit" == "$last_commit" ];then
+echo "[ 没有新的提交. 跳过...... ]"
+exit 0
+fi
+
+git rev-parse HEAD > last_commit.log
+
 export NDK_ROOT=/opt/android-ndk-r17c
 # 删除上一次的构建产物
 #rm -rf build.*
