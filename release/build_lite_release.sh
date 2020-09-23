@@ -12,8 +12,6 @@ echo "[ 没有新的提交. 跳过...... ]"
 exit 0
 fi
 
-git rev-parse HEAD > last_commit.log
-
 set -ex
 
 export NDK_ROOT=/opt/android-ndk-r17c
@@ -91,3 +89,6 @@ git checkout ./lite/tools/build_android.sh
 git checkout ./lite/tools/ci_build.sh
 echo '打包发布'
 ./PaddleSelfTools/release/build_lite_release_zip.sh
+
+echo '记录上次打包成功commit号'
+git rev-parse HEAD > last_commit.log
