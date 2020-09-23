@@ -2,23 +2,26 @@ set -ex
 git fetch
 git merge
 
-(read last_commit < 'last_commit.log') || true
+set +ex
+read last_commit < 'last_commit.log'
 echo "line : $last_commit"
 
 current_commit=$(git rev-parse HEAD)
-if [ "$current_commit" == "$last_commit" ];then
+if [ "$current_commit" = "$last_commit" ];then
 echo "[ 没有新的提交. 跳过...... ]"
 exit 0
 fi
 
 git rev-parse HEAD > last_commit.log
 
+set -ex
+
 export NDK_ROOT=/opt/android-ndk-r17c
 # 删除上一次的构建产物
 #rm -rf build.*
 # 删除上一次CMake自动生成的.h文件
-rm ./lite/api/paddle_use_kernels.h
-rm ./lite/api/paddle_use_ops.h
+rm ./lite/api/paddle_use_kernels.h || true
+rm ./lite/api/paddle_use_ops.h || true
 
 echo "NDK_ROOT: ${NDK_ROOT}"
 echo "ANDROID_NDK: ${ANDROID_NDK}"
