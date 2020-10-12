@@ -5,14 +5,13 @@
 extension=$1
 
 convert () {
-    perl -pi -e "s/lite::/lite_${1}::/g" "${2}"
-    perl -pi -e "s/namespace lite /namespace lite_${1} /g" "${2}"
-    perl -pi -e "s/paddle.lite./paddle.lite_${1}./g" "${2}"
+    perl -pi -e "s/paddle::/paddle_${1}::/g" "${2}"
+    perl -pi -e "s/namespace paddle /namespace paddle_${1} /g" "${2}"
 }
 
 revert () {
-    perl -pi -e "s/lite_[\w]*::/lite::/g" "${2}"
-    perl -pi -e "s/namespace lite_[\w]*/namespace lite/g" "${2}"
+    perl -pi -e "s/paddle_[\w]*::/paddle::/g" "${2}"
+    perl -pi -e "s/namespace paddle_[\w]*/namespace paddle/g" "${2}"
 }
 
 if [[ $2 == "revert" ]]; then
