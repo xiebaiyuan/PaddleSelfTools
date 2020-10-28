@@ -47,7 +47,7 @@ sed -i 's/readonly NUM_PROC=${LITE_BUILD_THREADS:-4}/readonly NUM_PROC=30 #${LIT
 sed -i 's/readonly NUM_PROC=${LITE_BUILD_THREADS:-4}/readonly NUM_PROC=30 #${LITE_BUILD_THREADS:-4}/' ./lite/tools/ci_build.sh
 
 
-if [ build_armonly ]
+if [ "$build_armonly" = "true" ]
 then
 echo 'arm v8'
 ./lite/tools/build_android.sh \
@@ -73,7 +73,7 @@ echo 'arm v7'
 fi
 
 
-if [ build_v8 ]
+if [ "$build_v8" = "true"]
 then
 echo 'opencl v8'
 ./lite/tools/build_android.sh \
