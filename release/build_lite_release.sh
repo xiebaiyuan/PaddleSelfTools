@@ -16,7 +16,7 @@ set -ex
 
 export NDK_ROOT=/opt/android-ndk-r17c
 # 删除上一次的构建产物
-#rm -rf build.*
+rm -rf build.*
 # 删除上一次CMake自动生成的.h文件
 rm ./lite/api/paddle_use_kernels.h || true
 rm ./lite/api/paddle_use_ops.h || true
