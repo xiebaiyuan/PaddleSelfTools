@@ -16,6 +16,7 @@ sample_num = 20
 need_save = False
 diff_threshold = 0.1
 feed_all_1 = True
+scale = 1.0
 force_gen_inputs_outputs = False
 need_print_mean = True
 show_correct_check = False
@@ -27,7 +28,7 @@ wanted_list = [
     "blocks.2.0.se.conv_reduce.tmp_0"
 ]
 
-model_path = "/data/paddle_face_model/saved-20201028-185037"
+model_path = "/data/paddle_yolo_nano_fp32_yongjia_saoma_1110/split_model"
 
 checked_model_path = model_path + "/" + "checked_model"
 feed_path = model_path + "/" + "feeds"
@@ -245,7 +246,7 @@ def gen_feed_kv():
         data = np.random.random(feed_shape).astype("float32")
         feed_kv[feed_name] = data
         if feed_all_1:
-            feed_kv[feed_name] = np.ones(feed_shape).astype("float32")
+            feed_kv[feed_name] = scale * np.ones(feed_shape).astype("float32")
     return feed_kv
 
 
@@ -487,7 +488,8 @@ def save_all_op_output(feed_kv=None):
             # 计算均值,方差
             if need_print_mean:
                 np_mean = np.mean(data_np_arr)
-                np_var = np.var(data_np_arr)
+                # np_var = np.var(data_np_arr)
+                np_std = np.std(data_np_arr)
 
                 #   template <typename T>
                 #   double compute_average_grow_rate(const T* in, const size_t length) {
@@ -510,7 +512,7 @@ def save_all_op_output(feed_kv=None):
                 # avg = np.average(data_np_arr, weights=wt)
                 pp_green(
                     "{0:<30} {1:<25.5f}{2:<25.5f} {3:<25.5f} {4:30}".format(
-                        var_name, np_mean, np_var, ave_grow_rate,
+                        var_name, np_mean, np_std, ave_grow_rate,
                         str(get_var_shape(var_name))), 1)
 
             sample = tensor_sample(data)
