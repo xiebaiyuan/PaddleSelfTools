@@ -36,7 +36,7 @@ echo 'arm v8'
 ./lite/tools/build_android.sh \
 --arch=armv8 \
 --toolchain=clang \
---android_stl=c++_static \
+--android_stl=c++_shared \
 --with_java=ON \
 --with_cv=ON \
 --with_log=OFF \
@@ -48,7 +48,7 @@ echo 'arm v7'
 ./lite/tools/build_android.sh \
 --arch=armv7 \
 --toolchain=clang \
---android_stl=c++_static \
+--android_stl=c++_shared \
 --with_java=ON \
 --with_cv=ON \
 --with_log=OFF \
@@ -61,7 +61,7 @@ echo 'opencl v8'
 ./lite/tools/build_android.sh \
 --arch=armv8 \
 --toolchain=clang \
---android_stl=c++_static \
+--android_stl=c++_shared \
 --with_java=ON \
 --with_exception=ON \
 --with_cv=ON \
@@ -73,7 +73,7 @@ echo 'opencl v7'
 ./lite/tools/build_android.sh \
 --arch=armv7 \
 --toolchain=clang \
---android_stl=c++_static \
+--android_stl=c++_shared \
 --with_java=ON \
 --with_cv=ON \
 --with_exception=ON \
