@@ -5,19 +5,22 @@ import os
 import time
 import shutil
 import paddle.fluid as fluid
-
+import paddle
 DEBUG = False
 
+paddle.enable_static()
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 4:
         print("Usage: python ./{} <model_dir>".format(
             os.path.basename(__file__)))
         exit(0)
 
     # input parameters
-    model_dir = sys.argv[1]  #whole dir
+    model_dir = sys.argv[1]
     if os.path.isdir(model_dir):
         dir_basename = os.path.basename(model_dir)
+    model_name = sys.argv[2]
+    param_name = sys.argv[3]
     timestamp = time.strftime("%Y%m%d_%H%M%S", time.localtime())
     save_model_dir = "".join(
         [model_dir, "/", dir_basename + "_splited_saved_", timestamp])
@@ -28,20 +31,27 @@ if __name__ == "__main__":
     # set params, model file names
     params_filename = ""
     model_filename = ""
-    if os.path.exists(model_dir + "/weights"):
-        params_filename = "weights"
-    elif os.path.exists(model_dir + "/params"):
-        params_filename = "params"
+    if os.path.exists(model_dir + "/" + model_name):
+        model_filename = model_name
     else:
-        print("[ERROR] No model parameters file `weights` or `params` found")
-        exit(0)
-    if os.path.exists(model_dir + "/model"):
-        model_filename = "model"
-    elif os.path.exists(model_dir + "/__model__"):
-        model_filename = "__model__"
+        print("[ERROR] model do not exist ")
+
+    if os.path.exists(model_dir + "/" + param_name):
+        params_filename = param_name
     else:
-        print("[ERROR] No model file `model` or `__model__` found")
-        exit(0)
+        print("[ERROR] params do not exist ")
+    # elif os.path.exists(model_dir + "/params"):
+    #     params_filename = "params"
+    # else:
+    #     print("[ERROR] No model parameters file `weights` or `params` found")
+    #     exit(0)
+    # if os.path.exists(model_dir + "/model"):
+    #     model_filename = "model"
+    # elif os.path.exists(model_dir + "/__model__"):
+    #     model_filename = "__model__"
+    # else:
+    #     print("[ERROR] No model file `model` or `__model__` found")
+    #     exit(0)
     print("[INFO] model_filename:{}".format(model_filename))
     print("[INFO] params_filename:{}".format(params_filename))
 
@@ -57,7 +67,7 @@ if __name__ == "__main__":
 
     # copy model to same directory
     model_src_path = "".join([model_dir, "/", model_filename])
-    model_dst_path = "".join([save_model_dir, "/", model_filename])
+    model_dst_path = "".join([save_model_dir, "/", "__model__"])
     shutil.copyfile(model_src_path, model_dst_path)
     if model_filename == "model":
         shutil.copyfile(model_src_path, "".join([save_model_dir,
