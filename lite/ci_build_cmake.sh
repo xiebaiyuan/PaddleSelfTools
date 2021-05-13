@@ -27,7 +27,7 @@ CUDNN_ROOT="/usr/local/cudnn"
 readonly ADB_WORK_DIR="/data/local/tmp"
 readonly common_flags="-DWITH_LITE=ON -DLITE_WITH_LIGHT_WEIGHT_FRAMEWORK=OFF -DWITH_PYTHON=OFF -DWITH_TESTING=ON -DLITE_WITH_ARM=OFF"
 
-readonly THIRDPARTY_TAR=https://paddle-inference-dist.bj.bcebos.com/PaddleLite/third-party-05b862.tar.gz
+readonly THIRDPARTY_TAR=https://paddlelite-data.bj.bcebos.com/third_party_libs/third-party-ea5576.tar.gz
 readonly workspace="../"
 
 NUM_CORES_FOR_COMPILE=${LITE_BUILD_THREADS:-8}
@@ -119,7 +119,7 @@ function cmake_opencl() {
         -DLITE_SHUTDOWN_LOG=OFF \
         -DLITE_WITH_CV=OFF \
         -DLITE_WITH_PROFILE=ON \
-        -DLITE_WITH_PRECISION_PROFILE=ON \
+        -DLITE_WITH_PRECISION_PROFILE=OFF \
         -DLITE_WITH_STATIC_CUDA=OFF \
         -DLITE_WITH_OPENMP=OFF \
         -DLITE_WITH_EXCEPTION=ON \
