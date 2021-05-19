@@ -65,6 +65,6 @@ fi
 
 adb push build.self.lite.android.armv7.clang.opencl/lite/api/${testname} /data/local/tmp/opencl/${testname}
 adb shell chmod +x /data/local/tmp/opencl/${testname}
-cmd="export GLOG_v=1; /data/local/tmp/opencl/${testname} --model_dir=${model_dir} -N=1 -C=3 -H=224 -W=224 -warmup=10 -repeats=10"
+cmd="export GLOG_v=1; /data/local/tmp/opencl/${testname} --model_dir=${model_dir} -N=1 -C=3 -H=224 -W=224 -warmup=10 -repeats=100"
 echo ${cmd}
 adb shell ${cmd}

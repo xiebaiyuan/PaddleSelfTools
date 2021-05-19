@@ -93,6 +93,6 @@ fi
 model_name="/data/local/tmp/opencl/models/model_porn_arm.nb"
 # model_name="lens_yolonano_opencl_dev_a18ca82e.nb"
 # model_name="caffe2pd_mobilenetv2_opencl_opt_dev_b740c549_20200323.nb"
-cmd="export GLOG_v=0;cd /data/local/tmp/opencl/; export LD_LIBRARY_PATH=.; /data/local/tmp/opencl/mobilenetv1_light_api ${model_name}  1 3 224 224 1 1 1"
+cmd="export Host2CLMode=0;export GLOG_v=0;cd /data/local/tmp/opencl/; export LD_LIBRARY_PATH=.; /data/local/tmp/opencl/mobilenetv1_light_api ${model_name}  1 3 224 224 1 1 1"
 echo ${cmd}
 adb shell ${cmd}
