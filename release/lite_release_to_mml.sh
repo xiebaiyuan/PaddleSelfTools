@@ -28,6 +28,7 @@ echo 'arm v8'
 --with_log=OFF \
 --with_extra=ON \
 --with_exception=ON \
+--with_static_lib=ON \
 --with_opencl=OFF
 
 echo 'arm v7'
@@ -40,6 +41,7 @@ echo 'arm v7'
 --with_log=OFF \
 --with_exception=ON \
 --with_extra=ON \
+--with_static_lib=ON \
 --with_opencl=OFF
 
 
@@ -53,6 +55,7 @@ echo 'opencl v8'
 --with_cv=ON \
 --with_log=OFF \
 --with_extra=ON \
+--with_static_lib=ON \
 --with_opencl=ON
 
 echo 'opencl v7'
@@ -65,6 +68,7 @@ echo 'opencl v7'
 --with_exception=ON \
 --with_log=OFF \
 --with_extra=ON \
+--with_static_lib=ON \
 --with_opencl=ON
 
 
