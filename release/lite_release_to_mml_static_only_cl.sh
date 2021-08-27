@@ -18,38 +18,12 @@ sed -i 's/readonly NUM_PROC=${LITE_BUILD_THREADS:-4}/readonly NUM_PROC=30 #${LIT
 sed -i 's/readonly NUM_PROC=${LITE_BUILD_THREADS:-4}/readonly NUM_PROC=30 #${LITE_BUILD_THREADS:-4}/' ./lite/tools/build_android.sh
 sed -i 's/readonly NUM_PROC=${LITE_BUILD_THREADS:-4}/readonly NUM_PROC=30 #${LITE_BUILD_THREADS:-4}/' ./lite/tools/ci_build.sh
 
-echo 'arm v8'
-./lite/tools/build_android.sh \
---arch=armv8 \
---toolchain=clang \
---android_stl=c++_shared \
---with_java=ON \
---with_cv=ON \
---with_log=OFF \
---with_extra=ON \
---with_exception=ON \
---with_static_lib=ON \
---with_opencl=OFF
-
-echo 'arm v7'
-./lite/tools/build_android.sh \
---arch=armv7 \
---toolchain=clang \
---android_stl=c++_shared \
---with_java=ON \
---with_cv=ON \
---with_log=OFF \
---with_exception=ON \
---with_static_lib=ON \
---with_extra=ON \
---with_opencl=OFF
-
 
 echo 'opencl v8'
 ./lite/tools/build_android.sh \
 --arch=armv8 \
 --toolchain=clang \
---android_stl=c++_shared \
+--android_stl=c++_static \
 --with_java=ON \
 --with_exception=ON \
 --with_static_lib=ON \
@@ -62,7 +36,7 @@ echo 'opencl v7'
 ./lite/tools/build_android.sh \
 --arch=armv7 \
 --toolchain=clang \
---android_stl=c++_shared \
+--android_stl=c++_static \
 --with_java=ON \
 --with_cv=ON \
 --with_exception=ON \
