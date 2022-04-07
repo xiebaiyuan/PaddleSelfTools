@@ -4,10 +4,11 @@ import sys
 import os
 import time
 import shutil
+import paddle
 import paddle.fluid as fluid
 from paddle.fluid.param_attr import ParamAttr
 from paddleslim.analysis import flops
-
+paddle.enable_static()
 
 def get_dir_size(dir):
     size = 0
@@ -34,20 +35,17 @@ if __name__ == "__main__":
     # set params, model file names
     params_filename = ""
     model_filename = ""
-    if os.path.exists(model_dir + "/weights"):
+    if os.path.exists(model_dir + "/model.pdmodel"):
+        model_filename = "model.pdmodel"
+        params_filename = "model.pdiparams"
+    elif os.path.exists(model_dir + "/weights"):
         params_filename = "weights"
     elif os.path.exists(model_dir + "/params"):
         params_filename = "params"
     else:
         print("[ERROR] No model parameters file `weights` or `params` found")
         exit(0)
-    if os.path.exists(model_dir + "/model"):
-        model_filename = "model"
-    elif os.path.exists(model_dir + "/__model__"):
-        model_filename = "__model__"
-    else:
-        print("[ERROR] No model file `model` or `__model__` found")
-        exit(0)
+
     print("[INFO] model_filename:{}".format(model_filename))
     print("[INFO] params_filename:{}".format(params_filename))
 
