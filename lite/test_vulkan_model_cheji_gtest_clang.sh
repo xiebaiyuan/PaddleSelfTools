@@ -64,6 +64,6 @@ fi
 
 adb push build.lite.android.armv8.clang.vulkan/lite/api/test/${testname} /data/local/tmp/opencl/${testname}
 adb shell chmod +x /data/local/tmp/opencl/${testname}
-cmd="export GLOG_v=1; /data/local/tmp/opencl/${testname} --model_dir=${model_dir} -N=1 -C=3 -H=192 -W=320 -warmup=1 -repeats=30"
+cmd="export GLOG_v=2; /data/local/tmp/opencl/${testname} --model_dir=${model_dir} -N=1 -C=3 -H=192 -W=320 -warmup=1 -repeats=30"
 echo ${cmd}
 adb shell ${cmd}
