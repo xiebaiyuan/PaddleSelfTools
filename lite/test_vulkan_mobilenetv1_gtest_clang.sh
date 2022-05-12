@@ -62,7 +62,7 @@ fi
 
 #adb push build.lite.android.armv8.clang.opencl/lite/kernels/opencl/test_reshape_opencl /data/local/tmp/opencl/test_reshape_opencl
 
-adb push build.lite.android.armv8.clang.vulkan/lite/api/test/${testname} /data/local/tmp/opencl/${testname}
+adb push build.lite.android.armv8.clang/lite/api/test/${testname} /data/local/tmp/opencl/${testname}
 adb shell chmod +x /data/local/tmp/opencl/${testname}
 cmd="export GLOG_v=1; /data/local/tmp/opencl/${testname} --model_dir=${model_dir} -N=1 -C=3 -H=224 -W=224 -warmup=100 -repeats=10"
 echo ${cmd}
