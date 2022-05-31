@@ -29,7 +29,7 @@ if [[ "$with_cmake" == "true" ]]; then
 fi
 
 if [[ "$with_make" == "true" ]]; then
-#    python ./lite/tools/cmake_tools/gen_opencl_code.py ./lite/backends/opencl/cl_kernel ./lite/backends/opencl/opencl_kernels_source.cc
+#    python3 ./lite/tools/cmake_tools/gen_opencl_code.py ./lite/backends/opencl/cl_kernel ./lite/backends/opencl/opencl_kernels_source.cc
     cd build.lite.android.armv7.clang
     make $testname -j$4
     cd -

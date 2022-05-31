@@ -504,6 +504,6 @@ class Converter:
 
 
 mdl_path = "datas/sourcemodels/source_profile/mobileNetModel.json"
-base_dir = "/Users/xiebaiyuan/PaddleProject/paddle-mobile/tools/python/modeltools/mobilenet/"
+base_dir = "/Users/xiebaiyuan/PaddleProject/paddle-mobile/tools/python3/modeltools/mobilenet/"
 converter = Converter(base_dir, mdl_path)
 converter.convert()

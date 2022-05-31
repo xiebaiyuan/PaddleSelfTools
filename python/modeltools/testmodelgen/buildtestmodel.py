@@ -504,6 +504,6 @@ class Converter:
 
 
 mdl_path = "/datas/test_sigmoid_model.json"
-base_dir = "/Users/xiebaiyuan/PaddleProject/GITHUB/PaddleMobileModelTools/python/modeltools/testmodelgen/"
+base_dir = "/Users/xiebaiyuan/PaddleProject/GITHUB/PaddleMobileModelTools/python3/modeltools/testmodelgen/"
 converter = Converter(base_dir, mdl_path)
 converter.convert()

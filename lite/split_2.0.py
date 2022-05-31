@@ -11,7 +11,7 @@ DEBUG = False
 paddle.enable_static()
 if __name__ == "__main__":
     if len(sys.argv) < 4:
-        print("Usage: python ./{} <model_dir>".format(
+        print("Usage: python3 ./{} <model_dir>".format(
             os.path.basename(__file__)))
         exit(0)
 

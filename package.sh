@@ -55,7 +55,7 @@ function init() {
   if [[ -f "${opencl_kernels}" ]]; then
     rm "${opencl_kernels}"
   fi
-  python gen_code.py "${merge_cl_to_so}" >"${opencl_kernels}"
+  python3 gen_code.py "${merge_cl_to_so}" >"${opencl_kernels}"
   cd -
 
   # get cl headers

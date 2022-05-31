@@ -154,7 +154,7 @@ class Optimiser:
                 print desc
 
                 f = open(
-                    "/Users/xiebaiyuan/PaddleProject/GITHUB/PaddleMobileModelTools/python/modeltools/tools/optimised/model",
+                    "/Users/xiebaiyuan/PaddleProject/GITHUB/PaddleMobileModelTools/python3/modeltools/tools/optimised/model",
                     "wb")
                 f.write(desc.SerializeToString())
                 f.close()

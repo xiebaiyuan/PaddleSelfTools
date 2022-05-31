@@ -15,7 +15,7 @@ from array import array
 # image.resize(shape_h_w)
 
 
-data = np.fromfile('/Users/xiebaiyuan/PaddleProject/paddle-mobile/tools/python/imagetools/datas/jpgs2/0000_0.9834-148196_82452-0ad4b83ec6bc0f9c5f28101539267054.jpg_p0_0.126571263346.jpg.input.npfile','f')
+data = np.fromfile('/Users/xiebaiyuan/PaddleProject/paddle-mobile/tools/python3/imagetools/datas/jpgs2/0000_0.9834-148196_82452-0ad4b83ec6bc0f9c5f28101539267054.jpg_p0_0.126571263346.jpg.input.npfile','f')
 print data.size
 print data
 

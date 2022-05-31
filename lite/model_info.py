@@ -64,7 +64,7 @@ def core_action(model_dir):
 #%%
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python ./{} <model_dir>".format(
+        print("Usage: python3 ./{} <model_dir>".format(
             os.path.basename(__file__)))
         exit(0)
 

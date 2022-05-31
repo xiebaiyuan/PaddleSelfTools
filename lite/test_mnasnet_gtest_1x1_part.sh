@@ -33,7 +33,7 @@ if [[ "$with_cmake" == "true" ]]; then
 fi
 
 if [[ "$with_make" == "true" ]]; then
-    python ./lite/tools/cmake_tools/gen_opencl_code.py ./lite/backends/opencl/cl_kernel ./lite/backends/opencl/opencl_kernels_source.cc
+    python3 ./lite/tools/cmake_tools/gen_opencl_code.py ./lite/backends/opencl/cl_kernel ./lite/backends/opencl/opencl_kernels_source.cc
     cd build.self.lite.android.armv7.clang.opencl
 
     make $testname -j$4
@@ -77,4 +77,4 @@ adb shell ${cmd}
 adb pull /data/local/tmp/mnasetnet_caffee.nb ./
 md5sum mnasetnet_caffee.nb
 cp mnasetnet_caffee.nb ${source_model_dir}
-python PaddleMobileTools/run_fluid_print.py
+python3 PaddleMobileTools/run_fluid_print.py

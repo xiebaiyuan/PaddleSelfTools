@@ -1,7 +1,7 @@
 import pickle, pprint
 
 merged_weight_bias = pickle.load(open(
-    "/Users/xiebaiyuan/PaddleProject/paddle-mobile/tools/python/modeltools/mobilenet/datas/all_inputs_outputs/merged_wegiths_bias.pkl",
+    "/Users/xiebaiyuan/PaddleProject/paddle-mobile/tools/python3/modeltools/mobilenet/datas/all_inputs_outputs/merged_wegiths_bias.pkl",
     'r'))
 
 keys = merged_weight_bias.keys()

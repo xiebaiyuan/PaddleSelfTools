@@ -81,7 +81,7 @@ class Swichter:
         # tmp_file = open(tmp_file_name, "wb")
 
         head = self.read_head(
-            '/Users/xiebaiyuan/PaddleProject/paddle-mobile/tools/python/modeltools/mobilenet/datas/sourcemodels/head/head')
+            '/Users/xiebaiyuan/PaddleProject/paddle-mobile/tools/python3/modeltools/mobilenet/datas/sourcemodels/head/head')
         to_file.write(head)
         to_file.write(from_file.read())
         from_file.close()
@@ -108,12 +108,12 @@ class Swichter:
         pass
 
 # Swichter().nhwc2nchw_one_slice_add_head(
-#     '/Users/xiebaiyuan/PaddleProject/paddle-mobile/python/tools/modeltools/multiobjects/float32s_nhwc/conv1_0.bin',
-#     '/Users/xiebaiyuan/PaddleProject/paddle-mobile/python/tools/modeltools/multiobjects/float32s_nchw_with_head/conv1_0',
-#     '/Users/xiebaiyuan/PaddleProject/paddle-mobile/python/tools/modeltools/multiobjects/float32s_nchw/.tmp',
+#     '/Users/xiebaiyuan/PaddleProject/paddle-mobile/python3/tools/modeltools/multiobjects/float32s_nhwc/conv1_0.bin',
+#     '/Users/xiebaiyuan/PaddleProject/paddle-mobile/python3/tools/modeltools/multiobjects/float32s_nchw_with_head/conv1_0',
+#     '/Users/xiebaiyuan/PaddleProject/paddle-mobile/python3/tools/modeltools/multiobjects/float32s_nchw/.tmp',
 #     32,
 #     3, 3, 3)
 
-# Swichter().read_head('/Users/xiebaiyuan/PaddleProject/paddle-mobile/python/tools/modeltools/yolo/head')
+# Swichter().read_head('/Users/xiebaiyuan/PaddleProject/paddle-mobile/python3/tools/modeltools/yolo/head')
 
 # Swichter().copy_add_head('datas/model.0.0.weight', 'datas/conv1_0', '')
