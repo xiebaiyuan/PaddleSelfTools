@@ -48,19 +48,19 @@ def compute_features(data, des=""):
     features['75th_percentile'] = np.percentile(data, 75)
     features['iqr'] = np.percentile(data, 75) - np.percentile(data, 25)  # Interquartile range
 
-    print(des)
+    print("\n" + des)
     # printfeatures
-    print(" mean:", features['mean'])
-    print(" std_dev:", features['std_dev'])
-    print(" skewness:", features['skewness'])
-    print(" kurtosis:", features['kurtosis'])
-    print(" min:", features['min'])
-    print(" max:", features['max'])
-    print(" range:", features['range'])
-    print(" 25th_percentile:", features['25th_percentile'])
-    print(" median:", features['median'])
-    print(" 75th_percentile:", features['75th_percentile'])
-    print(" iqr:", features['iqr'])
+    print("mean: {:.4f}".format(features['mean']))
+    print("std_dev: {:.4f}".format(features['std_dev']))
+    print("skewness: {:.4f}".format(features['skewness']))
+    print("kurtosis: {:.4f}".format(features['kurtosis']))
+    print("min: {:.4f}".format(features['min']))
+    print("max: {:.4f}".format(features['max']))
+    print("range: {:.4f}".format(features['range']))
+    print("25th_percentile: {:.4f}".format(features['25th_percentile']))
+    print("median: {:.4f}".format(features['median']))
+    print("75th_percentile: {:.4f}".format(features['75th_percentile']))
+    print("iqr: {:.4f}".format(features['iqr']))
     return features
 
 
@@ -164,7 +164,7 @@ def feed_randn(block, feed_target_names, batch_size=1, need_save=True):
             random_floats = random_ints.astype(np_dtype) / max_int
             # print(random_floats)
             # statistics = calculate_statistics(random_floats.flatten())
-            compute_features(random_floats.flatten(), "随机数统计")
+            compute_features(random_floats.flatten(), "生成随机数特征:")
             return random_floats
         else:
             # 非浮点类型直接生成随机整数
@@ -179,11 +179,11 @@ def feed_randn(block, feed_target_names, batch_size=1, need_save=True):
 def draw(block, filename='debug'):
     """
     """
-    dot_path = './' + filename + '.dot'
-    pdf_path = './' + filename + '.pdf'
-    debugger.draw_block_graphviz(block, path=dot_path)
-    cmd = ["dot", "-Tpdf", dot_path, "-o", pdf_path]
-    subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    # dot_path = './' + filename + '.dot'
+    # pdf_path = './' + filename + '.pdf'
+    # debugger.draw_block_graphviz(block, path=dot_path)
+    # cmd = ["dot", "-Tpdf", dot_path, "-o", pdf_path]
+    # subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 
 def fetch_tmp_vars(block, fetch_targets, var_names_list=None):
@@ -313,7 +313,7 @@ def print_results(results, fetch_targets, need_save=False):
         # statistics = calculate_statistics(A.flatten())
         # print(statistics)
 
-        compute_features(A.flatten(), fetch_targets[idx].name + " :统计结果:")
+        compute_features(A.flatten(), "输出 " + str(idx) + " (" + fetch_targets[idx].name + ") 特征: ")
         if need_save is True:
             numpy_to_txt(result, 'result_' + fetch_targets[idx].name.replace('/', '_'), True)
 
