@@ -68,6 +68,8 @@ def feed_ones(block, feed_target_names, batch_size=1):
     def set_batch_size(shape, batch_size):
         if shape[0] == -1:
             shape[0] = batch_size
+        if shape[1] == -1:
+            shape[1] = batch_size
         return shape
 
     def fill_ones(var_name, batch_size):
@@ -80,8 +82,9 @@ def feed_ones(block, feed_target_names, batch_size=1):
             paddle.float32: np.float32,
             paddle.float64: np.float64,
         }
+        np_shape = set_batch_size(list(var.shape), batch_size)
         np_dtype = var_np[var.dtype]
-        return np.ones(var.shape, dtype=np_dtype)
+        return np.ones(np_shape, dtype=np_dtype)
 
     for feed_target_name in feed_target_names:
         feed_dict[feed_target_name] = fill_ones(feed_target_name, batch_size)
@@ -284,7 +287,7 @@ def inference_test(model_path):
     print(net_program)
     global_block = net_program.global_block()
     draw(net_program.block(0))
-    feed_list = feed_ones(global_block, feed_target_names, 1)
+    feed_list = feed_ones(global_block, feed_target_names, GLB_batch_size)
     fetch_targets = fetch_tmp_vars(global_block, fetch_targets, [GLB_arg_name])
     results = exe.run(program=net_program,
                       feed=feed_list,

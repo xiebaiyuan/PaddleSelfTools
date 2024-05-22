@@ -90,13 +90,16 @@ def feed_randn(block, feed_target_names, batch_size=1, need_save=True):
     def set_batch_size(shape, batch_size):
         if shape[0] == -1:
             shape[0] = batch_size
+        if shape[1] == -1:
+            shape[1] = batch_size
         return shape
 
     def fill_randn(var_name, batch_size):
         var = block.var(var_name)
+        print("update var shape: {} of type {}".format(var_name, type(var.dtype)))
         np_shape = set_batch_size(list(var.shape), batch_size)
+        print(np_shape)
 
-        print(type(var.dtype))
         var_np = {
             paddle.bool: np.bool_,
             paddle.int32: np.int32,
@@ -113,6 +116,7 @@ def feed_randn(block, feed_target_names, batch_size=1, need_save=True):
         # 对浮点类型进行整数到浮点的转换
         if np.issubdtype(np_dtype, np.floating):
             max_int = 9999
+            print(np_shape)
             random_ints = np.random.randint(0, max_int + 1, np_shape)
             random_floats = random_ints.astype(np_dtype) / max_int
             compute_features(random_floats.flatten(), "生成随机数特征:")
@@ -277,7 +281,7 @@ def inference_test(model_path):
     print(net_program)
     global_block = net_program.global_block()
     draw(net_program.block(0))
-    feed_list = feed_randn(global_block, feed_target_names, 1, need_save=True)
+    feed_list = feed_randn(global_block, feed_target_names, GLB_batch_size, need_save=True)
     fetch_targets = fetch_tmp_vars(global_block, fetch_targets, [GLB_arg_name])
     results = exe.run(program=net_program,
                       feed=feed_list,
