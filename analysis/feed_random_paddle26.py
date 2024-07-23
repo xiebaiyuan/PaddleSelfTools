@@ -60,44 +60,57 @@ def compute_features(data, des=""):
     return features
 
 
-def feed_ones(block, feed_target_names, batch_size=1):
+def feed_ones(block, feed_target_names, batch_size=1, custom_shape=None):
     """
+    Feed ones to the network inputs with dynamic shapes supported.
     """
     feed_dict = dict()
 
-    def set_batch_size(shape, batch_size):
+    def set_batch_size(shape, batch_size, custom_shape):
+        if custom_shape:
+            return custom_shape
         if shape[0] == -1:
             shape[0] = batch_size
         return shape
 
-    def fill_ones(var_name, batch_size):
+    def fill_ones(var_name, batch_size, custom_shape):
         var = block.var(var_name)
-        np_shape = set_batch_size(list(var.shape), 1)
-        return np.ones(np_shape, dtype=var.dtype)
+        var_np = {
+            paddle.bool: np.bool_,
+            paddle.int32: np.int32,
+            paddle.int64: np.int64,
+            paddle.float16: np.float16,
+            paddle.float32: np.float32,
+            paddle.float64: np.float64,
+        }
+        np_shape = set_batch_size(list(var.shape), batch_size, custom_shape)
+        np_dtype = var_np[var.dtype]
+        return np.ones(np_shape, dtype=np_dtype)
 
     for feed_target_name in feed_target_names:
-        feed_dict[feed_target_name] = fill_ones(feed_target_name, batch_size)
+        feed_dict[feed_target_name] = fill_ones(feed_target_name, batch_size, custom_shape)
 
     return feed_dict
 
-
-def feed_randn(block, feed_target_names, batch_size=1, need_save=True):
+def feed_randn(block, feed_target_names, batch_size=1, custom_shape=None, need_save=True):
     """
-    Fill the network input with randomly generated data, converting integers to floats where applicable.
+    Fill the network input with randomly generated data, supporting dynamic shapes.
     """
     feed_dict = dict()
 
-    def set_batch_size(shape, batch_size):
+    def set_batch_size(shape, batch_size, custom_shape):
+        if custom_shape:
+            return custom_shape
         if shape[0] == -1:
             shape[0] = batch_size
         if shape[1] == -1:
             shape[1] = batch_size
         return shape
 
-    def fill_randn(var_name, batch_size):
+    def fill_randn(var_name, batch_size, custom_shape):
         var = block.var(var_name)
         print("update var shape: {} of type {}".format(var_name, type(var.dtype)))
-        np_shape = set_batch_size(list(var.shape), batch_size)
+        np_shape = set_batch_size(list(var.shape), batch_size, custom_shape)
         print(np_shape)
 
         var_np = {
@@ -126,7 +139,7 @@ def feed_randn(block, feed_target_names, batch_size=1, need_save=True):
             return np.random.randint(0, 100, np_shape, dtype=np_dtype)
 
     for feed_target_name in feed_target_names:
-        feed_dict[feed_target_name] = fill_randn(feed_target_name, batch_size)
+        feed_dict[feed_target_name] = fill_randn(feed_target_name, batch_size, custom_shape)
 
     return feed_dict
 
@@ -271,8 +284,9 @@ def numpy_to_txt(numpy_array, save_name, print_shape=True):
     fetch_txt_fp.close()
 
 
-def inference_test(model_path):
+def inference_test(model_path, custom_shape=None):
     """
+    Perform inference test with support for dynamic shapes.
     """
     exe = paddle.static.Executor(paddle.CPUPlace())
 
@@ -281,18 +295,12 @@ def inference_test(model_path):
     print(net_program)
     global_block = net_program.global_block()
     draw(net_program.block(0))
-    feed_list = feed_randn(global_block, feed_target_names, GLB_batch_size, need_save=True)
+    feed_list = feed_randn(global_block, feed_target_names, GLB_batch_size, custom_shape, need_save=True)
     fetch_targets = fetch_tmp_vars(global_block, fetch_targets, [GLB_arg_name])
     results = exe.run(program=net_program,
                       feed=feed_list,
                       fetch_list=fetch_targets,
                       return_numpy=False)
-    # for var_ in net_program.list_vars():
-    #  print var_
-    # print list(filter(None, net_program.list_vars()))
-    # paddle.static.save_inference_model(path_prefix="./debug_model", feed_vars=feed_target_names,
-    #                                    fetch_vars=fetch_targets,
-    #                                    executor=exe)
 
     print_results(results, fetch_targets, need_save=True)
 
@@ -303,6 +311,7 @@ if __name__ == "__main__":
     arg_parser.add_argument('--model_path', type=str, required=True)
     arg_parser.add_argument('--arg_name', type=str)
     arg_parser.add_argument('--batch_size', type=int)
+    arg_parser.add_argument('--custom_shape', type=int, nargs='+', help="Custom input shape, e.g., --custom_shape 1 3 64 64")
 
     args = arg_parser.parse_args()
     paddle.enable_static()
@@ -313,4 +322,6 @@ if __name__ == "__main__":
     if args.batch_size is not None:
         GLB_batch_size = args.batch_size
 
-    inference_test(GLB_model_path)
+    custom_shape = tuple(args.custom_shape) if args.custom_shape else None
+
+    inference_test(GLB_model_path, custom_shape)
